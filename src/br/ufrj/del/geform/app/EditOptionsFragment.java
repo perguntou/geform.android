@@ -6,7 +6,6 @@ import java.util.List;
 import android.annotation.SuppressLint;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.v4.app.DialogFragment;
 import android.support.v4.app.ListFragment;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -23,7 +22,7 @@ import br.ufrj.del.geform.bean.Item;
 /**
  *
  */
-public class EditOptionsFragment extends ListFragment implements EditDialogListener {
+public class EditOptionsFragment extends ListFragment {
 
 	public static final String FRAGMENT_TAG = "edit_option";
 	public static final String ARGUMENT_INDEX = "index";
@@ -88,32 +87,6 @@ public class EditOptionsFragment extends ListFragment implements EditDialogListe
 		editOptionDialog( getListView().getItemAtPosition( position ).toString(), position );
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see br.ufrj.del.geform.app.EditDialogListener#onDialogPositiveClick(android.support.v4.app.DialogFragment)
-	 */
-	@Override
-	public void onDialogPositiveClick( DialogFragment dialog ) {
-		String inputValue = ((EditDialog) dialog).getInputValue();
-		final Bundle args = dialog.getArguments();
-		final int position = args.getInt( ARGUMENT_INDEX );
-		if( !inputValue.equals("") ) {
-			if( position < m_options.size() ) {
-				m_options.set( position, inputValue );
-			} else {
-				m_options.add( inputValue );
-			}
-		}
-		((BaseAdapter) getListAdapter()).notifyDataSetChanged();
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * @see br.ufrj.del.geform.app.EditDialogListener#onDialogNegativeClick(android.support.v4.app.DialogFragment)
-	 */
-	@Override
-	public void onDialogNegativeClick( DialogFragment dialog ) {}
-
 	/**
 	 * Creates an edit dialog to change an option's value
 	 * @param option the initial value
@@ -121,8 +94,22 @@ public class EditOptionsFragment extends ListFragment implements EditDialogListe
 	 * @see EditDialog
 	 */
 	public void editOptionDialog( String option, int position ) {
-		final EditDialog newFragment = new EditDialog();
-		newFragment.setListener( this );
+		final EditDialog newFragment = new EditDialog() {
+			@Override
+			void onPositiveClick() {
+				final String inputValue = getInputValue();
+				final Bundle args = getArguments();
+				final int position = args.getInt( ARGUMENT_INDEX );
+				if( !"".equals( inputValue ) ) {
+					if( position < m_options.size() ) {
+						m_options.set( position, inputValue );
+					} else {
+						m_options.add( inputValue );
+					}
+				}
+				((BaseAdapter) getListAdapter()).notifyDataSetChanged();
+			}
+		};
 
 		final Bundle args = new Bundle();
 		final String title = getString( R.string.dialog_edit_option );

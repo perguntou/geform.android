@@ -7,7 +7,6 @@ import java.util.List;
 
 import junit.framework.Assert;
 import android.os.Bundle;
-import android.support.v4.app.DialogFragment;
 import android.support.v4.app.ListFragment;
 import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
@@ -26,7 +25,7 @@ import br.ufrj.del.geform.bean.Type;
 /**
  *
  */
-public class ItemFragment extends ListFragment implements EditDialogListener {
+public class ItemFragment extends ListFragment {
 		public static final String ARG_POSITION = "position";
 		public static final String ARG_ITEM = "item";
 		public static final String ARG_ANSWER = "answer";
@@ -171,13 +170,31 @@ public class ItemFragment extends ListFragment implements EditDialogListener {
 			}
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * @see br.ufrj.del.geform.app.EditDialogListener#onDialogPositiveClick(android.support.v4.app.DialogFragment)
+		/**
+		 * Creates an edit dialog to change a text answer
+		 * @param text the initial value
+		 * @see EditDialog
 		 */
-		@Override
-		public void onDialogPositiveClick( DialogFragment dialog ) {
-			String inputValue = ((EditDialog) dialog).getInputValue();
+		public void editTextAnswerDialog( String text ) {
+			final EditDialog newFragment = new EditDialog() {
+				@Override
+				void onPositiveClick() {
+					String inputValue = getInputValue();
+					updateAnswer( inputValue );
+				}
+			};
+
+			final Bundle args = new Bundle();
+			args.putString( EditDialog.ARGUMENT_VALUE, text );
+			newFragment.setArguments( args );
+
+			newFragment.show( getFragmentManager(), FRAGMENT_TAG );
+		}
+
+		/**
+		 * @param inputValue
+		 */
+		public void updateAnswer(String inputValue) {
 			if( "".equals( inputValue ) ) {
 				m_answer.clear();
 			} else {
@@ -188,29 +205,6 @@ public class ItemFragment extends ListFragment implements EditDialogListener {
 				}
 			}
 			((BaseAdapter) getListAdapter()).notifyDataSetChanged();
-		}
-
-		/*
-		 * (non-Javadoc)
-		 * @see br.ufrj.del.geform.app.EditDialogListener#onDialogNegativeClick(android.support.v4.app.DialogFragment)
-		 */
-		@Override
-		public void onDialogNegativeClick( DialogFragment dialog ) {}
-
-		/**
-		 * Creates an edit dialog to change a text answer
-		 * @param text the initial value
-		 * @see EditDialog
-		 */
-		public void editTextAnswerDialog( String text ) {
-			final EditDialog newFragment = new EditDialog();
-			newFragment.setListener( this );
-
-			final Bundle args = new Bundle();
-			args.putString( EditDialog.ARGUMENT_VALUE, text );
-			newFragment.setArguments( args );
-
-			newFragment.show( getFragmentManager(), FRAGMENT_TAG );
 		}
 
 }
