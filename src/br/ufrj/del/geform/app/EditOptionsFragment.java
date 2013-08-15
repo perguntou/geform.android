@@ -100,8 +100,13 @@ public class EditOptionsFragment extends ListFragment {
 				final String inputValue = getInputValue();
 				final Bundle args = getArguments();
 				final int position = args.getInt( ARGUMENT_INDEX );
-				if( !"".equals( inputValue ) ) {
-					if( position < m_options.size() ) {
+				final int size = m_options.size();
+				if( "".equals( inputValue ) ) {
+					if( position < size ) {
+						m_options.remove( position );
+					}
+				} else {
+					if( position < size ) {
 						m_options.set( position, inputValue );
 					} else {
 						m_options.add( inputValue );
