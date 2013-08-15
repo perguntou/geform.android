@@ -1,6 +1,5 @@
 package br.ufrj.del.geform.app;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
@@ -17,24 +16,7 @@ public class EditDialog extends DialogFragment {
 	public static final String ARGUMENT_TITLE = "title";
 	public static final String ARGUMENT_VALUE = "value";
 
-	private EditDialogListener m_listener;
 	private EditText m_input;
-
-	/*
-	 * (non-Javadoc)
-	 * @see android.support.v4.app.DialogFragment#onAttach(android.app.Activity)
-	 */
-	@Override
-	public void onAttach( Activity activity ) {
-		super.onAttach( activity );
-
-		if( m_listener == null ) {
-			final String msg = String.format( "Be sure that a listener is set for this %s. Use %s.setListener(...).",
-												EditDialog.class.getSimpleName(),
-												EditDialog.class.getName() );
-			throw new NullPointerException( msg );
-		}
-	}
 
 	/*
 	 * (non-Javadoc)
@@ -80,7 +62,7 @@ public class EditDialog extends DialogFragment {
 					 */
 					@Override
 					public void onClick( DialogInterface dialog, int which ) {
-						m_listener.onDialogPositiveClick( EditDialog.this );
+						onPositiveClick();
 					}
 				}
 		);
@@ -94,7 +76,7 @@ public class EditDialog extends DialogFragment {
 					 */
 					@Override
 					public void onClick( DialogInterface dialog, int which ) {
-						m_listener.onDialogNegativeClick( EditDialog.this );
+						onNegativeClick();
 						dialog.dismiss();
 					}
 				}
@@ -113,24 +95,12 @@ public class EditDialog extends DialogFragment {
 
 	/**
 	 * 
-	 * @param listener the listener to set.
-	 * @see EditDialogListener
 	 */
-	public void setListener( final Object listener ) {
-		try {
-			m_listener = (EditDialogListener) listener;
-		} catch( ClassCastException e ) {
-			throw new ClassCastException( listener + " must implement EditDialogListener" );
-		}
-	}
+	void onPositiveClick() {}
 
 	/**
 	 * 
-	 * @return the listener.
-	 * @see EditDialogListener
 	 */
-	public EditDialogListener getListener() {
-		return m_listener;
-	}
+	void onNegativeClick() {};
 
 }

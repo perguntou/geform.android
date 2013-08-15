@@ -4,7 +4,6 @@
 package br.ufrj.del.geform.app;
 
 import android.os.Bundle;
-import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
@@ -63,8 +62,8 @@ public class FormPagerAdapter extends FragmentStatePagerAdapter {
 			 * @see br.ufrj.del.geform.app.ItemFragment#onDialogPositiveClick(android.support.v4.app.DialogFragment)
 			 */
 			@Override
-			public void onDialogPositiveClick( DialogFragment dialog ) {
-				super.onDialogPositiveClick( dialog );
+			public void updateAnswer( String inputValue ) {
+				super.updateAnswer( inputValue );
 				updateCollectionFromItemFragment( this );
 			}
 		};
