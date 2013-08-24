@@ -53,7 +53,10 @@ public class XmlElements {
 		ITEM( "item" ),
 		QUESTION( "question" ),
 		OPTIONS( "options" ),
-		OPTION( "option" );
+		OPTION( "option" ),
+		COLLECTIONS( "collections" ),
+		COLLECTION( "collection" ),
+		ANSWER( "answer" );
 
 		private final String tag;
 
