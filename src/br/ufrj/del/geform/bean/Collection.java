@@ -69,6 +69,25 @@ public class Collection implements Parcelable {
 
 	/**
 	 * 
+	 * @return
+	 */
+	public int size() {
+		return m_collection.size();
+	}
+
+	/**
+	 * 
+	 * @param key
+	 * @param value
+	 */
+	public void add( int key, String value ) {
+		final Answer answer = get( key );
+		answer.add( value );
+		m_collection.put( key, answer );
+	}
+
+	/**
+	 * 
 	 * @param key
 	 */
 	public void delete( int key ) {
@@ -81,7 +100,7 @@ public class Collection implements Parcelable {
 	 */
 	public boolean isAllAnswered() {
 		final int numItems = m_reference.size();
-		final int numAnswers = m_collection.size();
+		final int numAnswers = size();
 		final boolean hasSameSize = numItems == numAnswers;
 		return hasSameSize;
 	}
