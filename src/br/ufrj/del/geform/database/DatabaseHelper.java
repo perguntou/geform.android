@@ -1,5 +1,8 @@
 package br.ufrj.del.geform.database;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -101,6 +104,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 		return id; 
 	}
 
+	/**
+	 * 
+	 * @param collection
+	 * @throws SQLException
+	 */
 	public void insertCollection ( Collection collection ) throws SQLException {
 		final Form reference = collection.getReference();
 		final Long formId = reference.id();
@@ -196,6 +204,56 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 		cursor.moveToFirst();
 
 		return cursor;
+	}
+
+	/**
+	 * 
+	 * @param formId
+	 * @param filterUpdated
+	 * @return
+	 */
+	public List<Collection> getCollectionsByForm( Long formId, boolean filterUpdated ) {
+		SQLiteDatabase db = m_instance.getReadableDatabase();
+		final String selection;
+		final String[] selectionArgs;
+		if( filterUpdated ) {
+			 selection = String.format( "%s = ? and %s = ?", CollectionsTable.COLUMN_FORM_ID, CollectionsTable.COLUMN_UPDATED );
+			 selectionArgs = new String[] { formId.toString(), String.valueOf( filterUpdated ) };
+		} else {
+			selection = String.format( "%s = ?", CollectionsTable.COLUMN_FORM_ID );
+			selectionArgs = new String[] { formId.toString() };
+		}
+		Cursor cursor = db.query(
+				CollectionsTable.TABLE_COLLECTION,
+				new String[]{ CollectionsTable._ID, CollectionsTable._COUNT, CollectionsTable.COLUMN_ITEM, CollectionsTable.COLUMN_ANSWER },
+				selection,
+				selectionArgs,
+				null,
+				null,
+				CollectionsTable._COUNT,
+				null );
+		cursor.moveToFirst();
+		final List<Collection> result = new ArrayList<Collection>();
+		final int countColumnIndex = cursor.getColumnIndex( CollectionsTable._COUNT );
+		final int itemColumnIndex = cursor.getColumnIndex( CollectionsTable.COLUMN_ITEM );
+		final int answerColumnIndex = cursor.getColumnIndex( CollectionsTable.COLUMN_ANSWER );
+		int count = 0;
+		Collection newCollection = null;
+		while( !cursor.isAfterLast() ) {
+			final int cursorCount = cursor.getInt( countColumnIndex );
+			final int cursorItem = cursor.getInt( itemColumnIndex );
+			final String cursorAnswer = cursor.getString( answerColumnIndex );
+			if( cursorCount != count ) {
+				final Form reference = new Form();
+				reference.setId( formId );
+				newCollection = new Collection( reference );
+				result.add( newCollection );
+				count = cursorCount;
+			}
+			newCollection.add( cursorItem, cursorAnswer );
+			cursor.moveToNext();
+		}
+		return result;
 	}
 
 }
