@@ -6,6 +6,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.ParseException;
+import java.util.List;
 
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -73,9 +74,11 @@ public class FormsActivity extends ListActivity {
 		try {
 			long identifier = listView.getItemIdAtPosition( position );
 			final File directory = getDir( "forms", FragmentActivity.MODE_PRIVATE );
-			final String path = String.format( "%s%s%s%s", directory, File.separator, identifier, Constants.extension );
+			final String path = String.format( "%s%s%s.%s", directory, File.separator, identifier, Constants.extension );
 			final FileInputStream in = new FileInputStream( path );
-			form = FormXmlPull.parse( in );
+			final FormXmlPull xmlHandler = FormXmlPull.getInstance();
+			final List<Form> result = xmlHandler.parse( in );
+			form = result.get(0);
 			form.setId( identifier );
 		} catch( FileNotFoundException e ) {
 			Log.e( "FormParse", e.getMessage() );
@@ -169,9 +172,10 @@ public class FormsActivity extends ListActivity {
 		final Long id = dbHelper.insertForm( form.title() );
 		try {
 			final File directory = getDir( "forms", FragmentActivity.MODE_PRIVATE );
-			final String path = String.format( "%s%s%s%s", directory, File.separator, id, Constants.extension );
+			final String path = String.format( "%s%s%s.%s", directory, File.separator, id, Constants.extension );
 			final FileOutputStream out = new FileOutputStream( path );
-			FormXmlPull.serialize( form , out );
+			final FormXmlPull xmlHandler = FormXmlPull.getInstance();
+			xmlHandler.serialize( form , out );
 		} catch (IllegalArgumentException e) {
 			Log.e( "FillActivity", e.getMessage() );
 		} catch (IllegalStateException e) {
