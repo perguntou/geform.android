@@ -120,20 +120,27 @@ public class FormsActivity extends ListActivity {
 		final Context context = getBaseContext();
 		switch( item.getItemId() ) {
 		case R.id.menu_form_add:
+		{
 			Intent intent = new Intent( context, EditFormActivity.class );
 			intent.putExtra( "form", (Parcelable) new Form() );
 			startActivityForResult( intent, CREATE_FORM );
 			break;
+		}
 		case R.id.menu_form_download:
+		{
 			//TODO get the URL to download the form from user input.
-			final Form form = NetworkHelper.downloadForm( Form.NO_ID );
+			final long id = Form.NO_ID;
+			final Form form = NetworkHelper.downloadForm( id );
 			if( form == null ) {
-				Toast.makeText( context, getString( R.string.message_download_error ), Toast.LENGTH_LONG ).show();
+				final String format = getString( R.string.message_download_error );
+				final String msg = String.format( format, id );
+				Toast.makeText( context, msg, Toast.LENGTH_LONG ).show();
 				return false;
 			}
 			insertForm( form );
 			updateAdapter();
 			break;
+		}
 		default:
 			return false;
 		}
