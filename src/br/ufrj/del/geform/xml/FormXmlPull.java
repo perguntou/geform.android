@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Locale;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -32,12 +33,16 @@ import br.ufrj.del.geform.xml.XmlElements.Tag;
  * @see InputStream
  * @see OutpuStream
  */
-public final class FormXmlPull {
+public final class FormXmlPull extends AbstractXmlPull {
 
-	private static final String FEATURE_INDENT_OUTPUT = "http://xmlpull.org/v1/doc/features.html#indent-output";
+	private static FormXmlPull m_instance;
 
-	private static final String ns = XmlPullParser.NO_NAMESPACE;
-	private static final String encoding = "utf-8";
+	public static FormXmlPull getInstance() {
+		if( m_instance == null ) {
+			m_instance = new FormXmlPull();
+		}
+		return m_instance;
+	}
 
 	/**
 	 * Processes the content of the given {@link InputStream} instance as XML
@@ -48,19 +53,19 @@ public final class FormXmlPull {
 	 * @throws IOException
 	 * @throws ParseException 
 	 */
-	public static Form parse( InputStream in ) throws XmlPullParserException, IOException, ParseException  {
-		try {
-			XmlPullParserFactory parserFactory = XmlPullParserFactory.newInstance();
-			XmlPullParser parser = parserFactory.newPullParser();
-			parser.setFeature( XmlPullParser.FEATURE_PROCESS_NAMESPACES, false );
-			parser.setInput( in, encoding );
-			parser.nextTag();
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<Form> parse( InputStream in ) throws XmlPullParserException, IOException, ParseException  {
+		XmlPullParserFactory parserFactory = m_instance.getFactory();
+		XmlPullParser parser = parserFactory.newPullParser();
+		parser.setFeature( XmlPullParser.FEATURE_PROCESS_NAMESPACES, false );
+		parser.setInput( in, encoding );
+		parser.nextTag();
 
-			final Form form = readForm( parser );
-			return form;
-		} finally {
-			in.close();
-		}
+		final List<Form> result = new ArrayList<Form>(1);
+		final Form form = readForm( parser );
+		result.add( form );
+		return result;
 	}
 
 	/**
@@ -73,20 +78,22 @@ public final class FormXmlPull {
 	 * @throws IllegalStateException
 	 * @throws IOException
 	 */
-	public static void serialize( Form form, OutputStream out ) throws XmlPullParserException, IllegalArgumentException, IllegalStateException, IOException {
-		try {
-			XmlPullParserFactory parserFactory = XmlPullParserFactory.newInstance();
-			parserFactory.setNamespaceAware( true );
-			XmlSerializer serializer = parserFactory.newSerializer();
-			serializer.setOutput( out, encoding );
-			serializer.setFeature( FEATURE_INDENT_OUTPUT, true );
+	@Override
+	public <T> void serialize( final List<T> forms, final OutputStream out ) throws XmlPullParserException, IllegalArgumentException, IllegalStateException, IOException {
+		@SuppressWarnings("unchecked")
+		final List<Form> list = (List<Form>) forms;
+		XmlPullParserFactory parserFactory = m_instance.getFactory();
+		parserFactory.setNamespaceAware( true );
+		XmlSerializer serializer = parserFactory.newSerializer();
+		serializer.setOutput( out, encoding );
+		serializer.setFeature( FEATURE_INDENT_OUTPUT, true );
 
-			serializer.startDocument( encoding, null );
+		serializer.startDocument( encoding, null );
+		for( ListIterator<Form> iterator = list.listIterator(); iterator.hasNext(); ) {
+			final Form form = iterator.next();
 			writeForm( form, serializer );
-			serializer.endDocument();
-		} finally {
-			out.close();
 		}
+		serializer.endDocument();
 	}
 
 	/**
@@ -102,7 +109,7 @@ public final class FormXmlPull {
 	private static Form readForm( XmlPullParser parser ) throws XmlPullParserException, IOException, ParseException {
 		Form form = new Form();
 
-		parser.require( XmlPullParser.START_TAG, ns, Tag.FORM.toString() );
+		parser.require( XmlPullParser.START_TAG, namespace, Tag.FORM.toString() );
 		while( parser.next() != XmlPullParser.END_TAG ) {
 			final int eventType = parser.getEventType();
 			if( eventType != XmlPullParser.START_TAG ) {
@@ -156,7 +163,7 @@ public final class FormXmlPull {
 	 * @see XmlSerializer
 	 */
 	private static void writeForm( Form form, XmlSerializer serializer ) throws IllegalArgumentException, IllegalStateException, IOException, XmlPullParserException {
-		serializer.startTag( ns, Tag.FORM.toString() );
+		serializer.startTag( namespace, Tag.FORM.toString() );
 
 		final Date timestamp = form.getTimestamp();
 		if( timestamp != null ) {
@@ -178,7 +185,7 @@ public final class FormXmlPull {
 			writeItem( item, serializer );
 		}
 
-		serializer.endTag( ns, Tag.FORM.toString() );
+		serializer.endTag( namespace, Tag.FORM.toString() );
 	}
 
 	/**
@@ -193,8 +200,8 @@ public final class FormXmlPull {
 	private static Item readItem( XmlPullParser parser ) throws XmlPullParserException, IOException {
 		Item item = new Item();
 
-		parser.require( XmlPullParser.START_TAG, ns, Tag.ITEM.toString() );
-		final String att = parser.getAttributeValue( ns, Attribute.TYPE.toString() );
+		parser.require( XmlPullParser.START_TAG, namespace, Tag.ITEM.toString() );
+		final String att = parser.getAttributeValue( namespace, Attribute.TYPE.toString() );
 		final Type type = Type.fromValue( att );
 		item.setType( type );
 		while( parser.next() != XmlPullParser.END_TAG ) {
@@ -234,14 +241,14 @@ public final class FormXmlPull {
 	 * @see XmlSerializer
 	 */
 	private static void writeItem( Item item, XmlSerializer serializer ) throws XmlPullParserException, IOException {
-		serializer.startTag( ns, Tag.ITEM.toString() );
+		serializer.startTag( namespace, Tag.ITEM.toString() );
 		final Type type = item.getType();
-		serializer.attribute( ns, Attribute.TYPE.toString(), type.toString() );
+		serializer.attribute( namespace, Attribute.TYPE.toString(), type.toString() );
 		serializeSimpleTextElement( item.getQuestion(), Tag.QUESTION, serializer );
 		if( item.hasOptions() ) {
 			writeOptions( item.getOptions(), serializer );
 		}
-		serializer.endTag( ns, Tag.ITEM.toString() );
+		serializer.endTag( namespace, Tag.ITEM.toString() );
 	}
 
 	/**
@@ -255,7 +262,7 @@ public final class FormXmlPull {
 	private static List<String> readOptions( XmlPullParser parser ) throws XmlPullParserException, IOException {
 		List<String> options = new ArrayList<String>();
 
-		parser.require( XmlPullParser.START_TAG, ns, Tag.OPTIONS.toString() );
+		parser.require( XmlPullParser.START_TAG, namespace, Tag.OPTIONS.toString() );
 		while( parser.next() != XmlPullParser.END_TAG ) {
 			if( parser.getEventType() != XmlPullParser.START_TAG ) {
 				continue;
@@ -275,7 +282,7 @@ public final class FormXmlPull {
 				}
 			}
 		}
-		parser.require(XmlPullParser.END_TAG, ns, Tag.OPTIONS.toString() );
+		parser.require(XmlPullParser.END_TAG, namespace, Tag.OPTIONS.toString() );
 
 		return options;
 	}
@@ -290,13 +297,13 @@ public final class FormXmlPull {
 	 * @see XmlSerializer
 	 */
 	private static void writeOptions( List<String> options, XmlSerializer serializer ) throws IllegalArgumentException, IllegalStateException, IOException {
-		serializer.startTag( ns, Tag.OPTIONS.toString() );
+		serializer.startTag( namespace, Tag.OPTIONS.toString() );
 		Iterator<String> it = options.iterator();
 		while( it.hasNext() ) {
 			final String option = it.next();
 			writeOption( option, serializer );
 		}
-		serializer.endTag( ns, Tag.OPTIONS.toString() );
+		serializer.endTag( namespace, Tag.OPTIONS.toString() );
 	}
 
 	/**
@@ -308,10 +315,10 @@ public final class FormXmlPull {
 	 */
 	private static String readOption( XmlPullParser parser ) throws XmlPullParserException, IOException
 	{
-		parser.require( XmlPullParser.START_TAG, ns, Tag.OPTION.toString() );
+		parser.require( XmlPullParser.START_TAG, namespace, Tag.OPTION.toString() );
 		final String value = readText( parser );
 		final String option = value.trim();
-		parser.require( XmlPullParser.END_TAG, ns, Tag.OPTION.toString() );
+		parser.require( XmlPullParser.END_TAG, namespace, Tag.OPTION.toString() );
 
 		return option;
 	}
@@ -345,45 +352,5 @@ public final class FormXmlPull {
 		}
 		return text;
 	}
-
-	/**
-	 * Internal method that serializes a simple text element.
-	 * @param value the value associated to the element.
-	 * @param tag the tag element.
-	 * @param serializer the responsible for serialize.
-	 * @throws IllegalArgumentException
-	 * @throws IllegalStateException
-	 * @throws IOException
-	 */
-	private static void serializeSimpleTextElement( String value, Tag tag, XmlSerializer serializer ) throws IllegalArgumentException, IllegalStateException, IOException {
-		serializer.startTag( ns, tag.toString() );
-			serializer.text( value );
-		serializer.endTag( ns, tag.toString() );
-	}
-
-//	/**
-//	 * Skips tags the parser isn't interested in. Uses depth to handle nested tags. i.e.,
-//	 * if the next tag after a START_TAG isn't a matching END_TAG, it keeps going until it
-//	 * finds the matching END_TAG (as indicated by the value of "depth" being 0).
-//	 * @param parser XmlPullParser instance
-//	 * @throws XmlPullParserException
-//	 * @throws IOException
-//	 */
-//	private static void skip( XmlPullParser parser ) throws XmlPullParserException, IOException {
-//		if( parser.getEventType() != XmlPullParser.START_TAG ) {
-//			throw new IllegalStateException();
-//		}
-//		int depth = 1;
-//		while( depth != 0 ) {
-//			switch( parser.next() ) {
-//			case XmlPullParser.END_TAG:
-//					depth--;
-//					break;
-//			case XmlPullParser.START_TAG:
-//					depth++;
-//					break;
-//			}
-//		}
-//	}
 
 }

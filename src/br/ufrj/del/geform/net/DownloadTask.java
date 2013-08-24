@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.ParseException;
+import java.util.List;
 
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -16,18 +17,18 @@ import br.ufrj.del.geform.xml.FormXmlPull;
 /**
  * 
  */
-public class DownloadTask extends AsyncTask<String, Void, Form> {
+public class DownloadTask extends AsyncTask<URL, Void, Form> {
 
 	/*
 	 * (non-Javadoc)
 	 * @see android.os.AsyncTask#doInBackground(Params[])
 	 */
 	@Override
-	protected Form doInBackground( String... urls ) {
+	protected Form doInBackground( URL... urls ) {
 		Form form = null;
 		try {
-			final String urlString = urls[0];
-			form = download( urlString );
+			final URL url = urls[0];
+			form = download( url );
 		} catch( IOException e ) {
 			Log.e( "DownloadTask", e.getMessage() );
 		} catch( XmlPullParserException e ) {
@@ -47,13 +48,15 @@ public class DownloadTask extends AsyncTask<String, Void, Form> {
 	 * @throws IOException
 	 * @throws ParseException
 	 */
-	private Form download( String urlString ) throws XmlPullParserException, IOException, ParseException {
+	private Form download( URL url ) throws XmlPullParserException, IOException, ParseException {
 		InputStream stream = null;
 		Form form = null;
 
 		try {
-			stream = inputStreamFromURL( urlString );
-			form = FormXmlPull.parse( stream );
+			stream = inputStreamFromURL( url );
+			final FormXmlPull xmlHandler = FormXmlPull.getInstance();
+			final List<Form> result = xmlHandler.parse( stream );
+			form = result.get(0);
 		} finally {
 			if( stream != null ) {
 				stream.close();
@@ -69,8 +72,7 @@ public class DownloadTask extends AsyncTask<String, Void, Form> {
 	 * @return
 	 * @throws IOException
 	 */
-	private InputStream inputStreamFromURL( String urlString ) throws IOException {
-		URL url = new URL( urlString );
+	private InputStream inputStreamFromURL( URL url ) throws IOException {
 		HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 
 		conn.setReadTimeout( 10000 /* milliseconds */ );

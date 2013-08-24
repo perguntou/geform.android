@@ -83,7 +83,6 @@ public class EditFormActivity extends ListActivity {
 			break;
 		case R.id.menu_item_add:
 		{
-			
 			final Intent intent = new Intent( EditFormActivity.this, EditItemActivity.class );
 			intent.putExtra( "item", new Item() );
 			intent.putExtra( "requestPosition", m_form.size() + 1 );
