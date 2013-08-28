@@ -20,6 +20,7 @@
 
     <string name="dialog_edit">Edit</string>
     <string name="dialog_edit_option">Option</string>
+    <string name="dialog_form_download">Form identifier:</string>
     <string name="title_activity_fill">Fill</string>
     <string name="title_activity_forms">FormsActivity</string>
 

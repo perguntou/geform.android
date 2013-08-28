@@ -10,17 +10,19 @@ import java.util.List;
 
 import org.xmlpull.v1.XmlPullParserException;
 
-import android.app.ListActivity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.v4.app.FragmentActivity;
+import android.text.InputType;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
@@ -33,7 +35,7 @@ import br.ufrj.del.geform.net.NetworkHelper;
 import br.ufrj.del.geform.xml.FormXmlPull;
 
 
-public class FormsActivity extends ListActivity {
+public class FormsActivity extends FragmentActivity {
 
 	private static final int COLLECT_DATA = 0;
 	private static final int CREATE_FORM = 1;
@@ -50,8 +52,44 @@ public class FormsActivity extends ListActivity {
 
 		final LayoutInflater layoutInflater = getLayoutInflater();
 		final View header = layoutInflater.inflate( R.layout.header_forms, null );
-		final ListView listView = getListView();
+		final ListView listView = (ListView) findViewById( android.R.id.list );
+		listView.setOnItemClickListener( new OnItemClickListener() {
+			@Override
+			public void onItemClick( AdapterView<?> parent, View view, int position, long id ) {
+				Form form = null;
+				try {
+					final ListView listView = getListView();
+					long identifier = listView.getItemIdAtPosition( position );
+					final File directory = getDir( "forms", FragmentActivity.MODE_PRIVATE );
+					final String path = String.format( "%s%s%s.%s", directory, File.separator, identifier, Constants.extension );
+					final FileInputStream in = new FileInputStream( path );
+					final FormXmlPull xmlHandler = FormXmlPull.getInstance();
+					final List<Form> result = xmlHandler.parse( in );
+					form = result.get(0);
+					form.setId( identifier );
+				} catch( FileNotFoundException e ) {
+					Log.e( "FormParse", e.getMessage() );
+					e.printStackTrace();
+				} catch( XmlPullParserException e ) {
+					Log.e( "FormParse", e.getMessage() );
+					e.printStackTrace();
+				} catch( IOException e ) {
+					Log.e( "FormParse", e.getMessage() );
+					e.printStackTrace();
+				} catch (ParseException e) {
+					e.printStackTrace();
+				}
+
+				final Collection collection = new Collection( form );
+				final Context context = getBaseContext();
+				Intent intent = new Intent( context, FillFormActivity.class );
+				intent.putExtra( "collection", collection );
+
+				startActivityForResult( intent, COLLECT_DATA );
+			}
+		} );
 		listView.addHeaderView( header, null, false );
+		setListView( listView );
 
 		final Context applicationContext = getApplicationContext();
 		final DatabaseHelper dbHelper = DatabaseHelper.getInstance( applicationContext );
@@ -60,45 +98,6 @@ public class FormsActivity extends ListActivity {
 		final ListAdapter adapter = new FormAdapter( context, dbHelper.getFormsTitleAndCounter() );
 
 		setListAdapter( adapter );
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * @see android.support.v4.app.ListFragment#onListItemClick(android.widget.ListView, android.view.View, int, long)
-	 */
-	@Override
-	public void onListItemClick( ListView listView, View view, int position, long id ) {
-		super.onListItemClick( listView, view, position, id );
-
-		Form form = null;
-		try {
-			long identifier = listView.getItemIdAtPosition( position );
-			final File directory = getDir( "forms", FragmentActivity.MODE_PRIVATE );
-			final String path = String.format( "%s%s%s.%s", directory, File.separator, identifier, Constants.extension );
-			final FileInputStream in = new FileInputStream( path );
-			final FormXmlPull xmlHandler = FormXmlPull.getInstance();
-			final List<Form> result = xmlHandler.parse( in );
-			form = result.get(0);
-			form.setId( identifier );
-		} catch( FileNotFoundException e ) {
-			Log.e( "FormParse", e.getMessage() );
-			e.printStackTrace();
-		} catch( XmlPullParserException e ) {
-			Log.e( "FormParse", e.getMessage() );
-			e.printStackTrace();
-		} catch( IOException e ) {
-			Log.e( "FormParse", e.getMessage() );
-			e.printStackTrace();
-		} catch (ParseException e) {
-			e.printStackTrace();
-		}
-
-		final Collection collection = new Collection( form );
-		final Context context = getBaseContext();
-		Intent intent = new Intent( context, FillFormActivity.class );
-		intent.putExtra( "collection", collection );
-
-		startActivityForResult( intent, COLLECT_DATA );
 	}
 
 	/*
@@ -128,17 +127,36 @@ public class FormsActivity extends ListActivity {
 		}
 		case R.id.menu_form_download:
 		{
-			//TODO get the URL to download the form from user input.
-			final long id = Form.NO_ID;
-			final Form form = NetworkHelper.downloadForm( id );
-			if( form == null ) {
-				final String format = getString( R.string.message_download_error );
-				final String msg = String.format( format, id );
-				Toast.makeText( context, msg, Toast.LENGTH_LONG ).show();
-				return false;
-			}
-			insertForm( form );
-			updateAdapter();
+			final EditDialog dialog = new EditDialog() {
+				@Override
+				void onPositiveClick() {
+					final String value = this.getInputValue();
+					if( !"".equals( value ) ) {
+						try {
+							final long id = Long.parseLong( value ); 
+							final Form form = NetworkHelper.downloadForm( id );
+							if( form == null ) {
+								final String format = getString( R.string.message_download_error );
+								final String msg = String.format( format, id );
+								Toast.makeText( context, msg, Toast.LENGTH_LONG ).show();
+								return;
+							}
+							insertForm( form );
+							updateAdapter();
+						} catch( NumberFormatException e ) {
+							final String format = getString( R.string.message_id_invalid );
+							final String msg = String.format( format, value );
+							Toast.makeText( context, msg, Toast.LENGTH_LONG ).show();
+						}
+					}
+				}
+			};
+			final Bundle args = new Bundle();
+			final String title = getString( R.string.dialog_form_download );
+			args.putString( EditDialog.ARGUMENT_TITLE, title );
+			args.putInt( EditDialog.ARGUMENT_INPUT_TYPE, InputType.TYPE_CLASS_NUMBER );
+			dialog.setArguments( args );
+			dialog.show( this.getSupportFragmentManager(), "" );
 			break;
 		}
 		default:
@@ -204,5 +222,38 @@ public class FormsActivity extends ListActivity {
 		final DatabaseHelper dbHelper = DatabaseHelper.getInstance( this );
 		adapter.changeCursor( dbHelper.getFormsTitleAndCounter() );
 	}
+
+	/**
+	 * @return the listView
+	 */
+	public ListView getListView() {
+		return m_listView;
+	}
+
+	/**
+	 * @param listView the listView to set
+	 */
+	public void setListView( ListView listView) {
+		this.m_listView = listView;
+	}
+
+	/**
+	 * 
+	 * @param adapter
+	 */
+	private void setListAdapter( ListAdapter adapter ) {
+		m_listView.setAdapter( adapter );
+	}
+
+	/**
+	 * 
+	 * @return
+	 */
+	private ListAdapter getListAdapter() {
+		final ListAdapter adapter = m_listView.getAdapter();
+		return adapter;
+	}
+
+	private ListView m_listView;
 
 }
