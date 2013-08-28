@@ -15,7 +15,7 @@ import br.ufrj.del.geform.bean.Form;
  */
 public class NetworkHelper {
 
-	public static final String SERVER_URL = "http://dl.dropbox.com/u/50275577/sample.gef";
+	public static final String SERVER_URL = "http://10.0.2.2:8080/GeFormWS/rest/form";
 
 	/**
 	 * 
@@ -24,8 +24,7 @@ public class NetworkHelper {
 	 */
 	public static Form downloadForm( long formId ) {
 		final DownloadTask downloadTask = new DownloadTask();
-		//TODO get the form from the right path and using the input formId
-		final String path = String.format( SERVER_URL );
+		final String path = String.format("%s/%s", SERVER_URL, formId );
 		try {
 			final URL url = new URL( path );
 			final AsyncTask<URL, Void, Form> task = downloadTask.execute( url );
