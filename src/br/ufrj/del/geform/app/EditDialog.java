@@ -2,10 +2,13 @@ package br.ufrj.del.geform.app;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
+import android.support.v4.app.FragmentActivity;
 import android.text.Editable;
+import android.text.InputType;
 import android.widget.EditText;
 import br.ufrj.del.geform.R;
 
@@ -28,7 +31,10 @@ public class EditDialog extends DialogFragment {
 	@Override
 	public Dialog onCreateDialog( Bundle savedInstanceState ) {
 
-		final AlertDialog.Builder builder = new AlertDialog.Builder( getActivity() );
+		final FragmentActivity activity = getActivity();
+		final Context context = activity.getBaseContext();
+
+		final AlertDialog.Builder builder = new AlertDialog.Builder( activity );
 
 		final CharSequence title;
 		final CharSequence value;
@@ -37,6 +43,7 @@ public class EditDialog extends DialogFragment {
 
 		final CharSequence defaultTitle = getString( R.string.dialog_edit );
 		final CharSequence defaultValue = "";
+		final int defaultInputType = InputType.TYPE_CLASS_TEXT;
 
 		if( args != null ) {
 			final CharSequence candidateTitle = args.getString( ARGUMENT_TITLE );  
@@ -45,19 +52,18 @@ public class EditDialog extends DialogFragment {
 			final CharSequence candidateValue = args.getString( ARGUMENT_VALUE );
 			value = candidateValue == null ? defaultValue :  candidateValue;
 
-			inputType = args.getInt( ARGUMENT_INPUT_TYPE );
+			final int candidateInputType = args.getInt( ARGUMENT_INPUT_TYPE );
+			inputType = candidateInputType == 0 ? defaultInputType : candidateInputType;
 		} else {
 			title = defaultTitle;
 			value = defaultValue;
-			inputType = null;
+			inputType = defaultInputType; 
 		}
 
 		builder.setTitle( title );
 
-		m_input = new EditText( getActivity().getApplicationContext() );
-		if( inputType != null ) {
-			m_input.setInputType( inputType );
-		}
+		m_input = new EditText( context );
+		m_input.setInputType( inputType );
 		m_input.setText( value );
 		final int textColor = getResources().getColor( android.R.color.primary_text_light );
 		m_input.setTextColor( textColor );
