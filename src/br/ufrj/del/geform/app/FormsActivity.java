@@ -6,23 +6,26 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.ParseException;
+import java.util.Arrays;
 import java.util.List;
 
 import org.xmlpull.v1.XmlPullParserException;
 
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.v4.app.FragmentActivity;
 import android.text.InputType;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.HeaderViewListAdapter;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.ProgressBar;
@@ -70,13 +73,10 @@ public class FormsActivity extends FragmentActivity {
 					form = result.get(0);
 					form.setId( identifier );
 				} catch( FileNotFoundException e ) {
-					Log.e( "FormParse", e.getMessage() );
 					e.printStackTrace();
 				} catch( XmlPullParserException e ) {
-					Log.e( "FormParse", e.getMessage() );
 					e.printStackTrace();
 				} catch( IOException e ) {
-					Log.e( "FormParse", e.getMessage() );
 					e.printStackTrace();
 				} catch (ParseException e) {
 					e.printStackTrace();
@@ -97,7 +97,8 @@ public class FormsActivity extends FragmentActivity {
 		final DatabaseHelper dbHelper = DatabaseHelper.getInstance( applicationContext );
 
 		final Context context = getBaseContext();
-		final ListAdapter adapter = new FormAdapter( context, dbHelper.getFormsTitleAndCounter() );
+		Cursor cursor = dbHelper.getFormsTitleAndCounter();
+		final ListAdapter adapter = new FormAdapter( context, cursor );
 
 		setListAdapter( adapter );
 	}
@@ -108,7 +109,8 @@ public class FormsActivity extends FragmentActivity {
 	 */
 	@Override
 	public boolean onCreateOptionsMenu( Menu menu ) {
-		getMenuInflater().inflate( R.menu.menu_forms, menu );
+		final MenuInflater menuInflater = getMenuInflater();
+		menuInflater.inflate( R.menu.menu_forms, menu );
 		return true;
 	}
 
@@ -214,17 +216,17 @@ public class FormsActivity extends FragmentActivity {
 			final String path = String.format( "%s%s%s.%s", directory, File.separator, id, Constants.extension );
 			final FileOutputStream out = new FileOutputStream( path );
 			final FormXmlPull xmlHandler = FormXmlPull.getInstance();
-			xmlHandler.serialize( form , out );
-		} catch (IllegalArgumentException e) {
-			Log.e( "FillActivity", e.getMessage() );
+			xmlHandler.serialize( Arrays.asList(form) , out );
+		} catch( IllegalArgumentException e ) {
+			e.printStackTrace();
 		} catch (IllegalStateException e) {
-			Log.e( "FillActivity", e.getMessage() );
+			e.printStackTrace();
 		} catch (FileNotFoundException e) {
-			Log.e( "FillActivity", e.getMessage() );
+			e.printStackTrace();
 		} catch (XmlPullParserException e) {
-			Log.e( "FillActivity", e.getMessage() );
+			e.printStackTrace();
 		} catch (IOException e) {
-			Log.e( "FillActivity", e.getMessage() );
+			e.printStackTrace();
 		}
 	}
 
@@ -234,7 +236,8 @@ public class FormsActivity extends FragmentActivity {
 	private void updateAdapter() {
 		final FormAdapter adapter = (FormAdapter) getListAdapter();
 		final DatabaseHelper dbHelper = DatabaseHelper.getInstance( this );
-		adapter.changeCursor( dbHelper.getFormsTitleAndCounter() );
+		Cursor cursor = dbHelper.getFormsTitleAndCounter();
+		adapter.changeCursor( cursor );
 	}
 
 	/**
@@ -264,7 +267,8 @@ public class FormsActivity extends FragmentActivity {
 	 * @return
 	 */
 	private ListAdapter getListAdapter() {
-		final ListAdapter adapter = m_listView.getAdapter();
+		final HeaderViewListAdapter listAdapter = (HeaderViewListAdapter) m_listView.getAdapter();
+		final ListAdapter adapter = listAdapter.getWrappedAdapter();
 		return adapter;
 	}
 
