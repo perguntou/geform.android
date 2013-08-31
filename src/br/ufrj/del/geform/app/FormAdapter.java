@@ -22,10 +22,10 @@ public class FormAdapter extends CursorAdapter {
 	/**
 	 * 
 	 * @param context
-	 * @param c
+	 * @param cursor
 	 */
-	public FormAdapter( Context context, Cursor c ) {
-		super( context, c, CursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER );
+	public FormAdapter( Context context, Cursor cursor ) {
+		super( context, cursor, CursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER );
 	}
 
 	/*
@@ -48,12 +48,14 @@ public class FormAdapter extends CursorAdapter {
 	public void bindView( View view, Context context, Cursor cursor ) {
 		final TextView textViewFormTitle = (TextView) view.findViewById( android.R.id.text1 );
 		final int formTitleColumnIndex = cursor.getColumnIndexOrThrow( FormsTable.COLUMN_TITLE );
-		textViewFormTitle.setText( cursor.getString( formTitleColumnIndex ) );
+		String stringTitle = cursor.getString( formTitleColumnIndex );
+		textViewFormTitle.setText( stringTitle );
 
 		final TextView textViewCounterCollections = (TextView) view.findViewById( android.R.id.text2 );
 		final int counterCollectionsColumnIndex = cursor.getColumnIndex( CollectionsTable._COUNT );
 		final int counter = cursor.getInt( counterCollectionsColumnIndex );
-		textViewCounterCollections.setText( context.getString( R.string.counter_collections, counter ) );
+		String stringCounter = context.getString( R.string.counter_collections, counter );
+		textViewCounterCollections.setText( stringCounter );
 	}
 
 	/*
