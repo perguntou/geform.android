@@ -25,6 +25,7 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListAdapter;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 import br.ufrj.del.geform.Constants;
 import br.ufrj.del.geform.R;
@@ -53,6 +54,7 @@ public class FormsActivity extends FragmentActivity {
 		final LayoutInflater layoutInflater = getLayoutInflater();
 		final View header = layoutInflater.inflate( R.layout.header_forms, null );
 		final ListView listView = (ListView) findViewById( android.R.id.list );
+		m_progressBar = (ProgressBar) findViewById( android.R.id.progress );
 		listView.setOnItemClickListener( new OnItemClickListener() {
 			@Override
 			public void onItemClick( AdapterView<?> parent, View view, int position, long id ) {
@@ -115,7 +117,7 @@ public class FormsActivity extends FragmentActivity {
 	 * @see android.app.Activity#onOptionsItemSelected(android.view.MenuItem)
 	 */
 	@Override
-	public boolean onOptionsItemSelected( MenuItem item ) {
+	public boolean onOptionsItemSelected( final MenuItem item ) {
 		final Context context = getBaseContext();
 		switch( item.getItemId() ) {
 		case R.id.menu_form_add:
@@ -127,22 +129,34 @@ public class FormsActivity extends FragmentActivity {
 		}
 		case R.id.menu_form_download:
 		{
+			final NetworkHelper network = new NetworkHelper() {
+				@Override
+				protected void onPreExecute() {
+					item.setEnabled( false );
+					m_progressBar.setVisibility( ProgressBar.VISIBLE );
+				}
+				@Override
+				protected void onPostExecute( Form result ) {
+					item.setEnabled( true );
+					m_progressBar.setVisibility( ProgressBar.INVISIBLE );
+					if( result == null ) {
+						final String msg = getString( R.string.message_download_error );
+						final Toast toast = Toast.makeText( context, msg, Toast.LENGTH_LONG );
+						toast.show();
+						return;
+					}
+					insertForm( result );
+					updateAdapter();
+				}
+			};
 			final EditDialog dialog = new EditDialog() {
 				@Override
 				void onPositiveClick() {
 					final String value = this.getInputValue();
 					if( !"".equals( value ) ) {
 						try {
-							final long id = Long.parseLong( value ); 
-							final Form form = NetworkHelper.downloadForm( id );
-							if( form == null ) {
-								final String format = getString( R.string.message_download_error );
-								final String msg = String.format( format, id );
-								Toast.makeText( context, msg, Toast.LENGTH_LONG ).show();
-								return;
-							}
-							insertForm( form );
-							updateAdapter();
+							final long id = Long.parseLong( value );
+							network.downloadForm( id );
 						} catch( NumberFormatException e ) {
 							final String format = getString( R.string.message_id_invalid );
 							final String msg = String.format( format, value );
@@ -255,5 +269,6 @@ public class FormsActivity extends FragmentActivity {
 	}
 
 	private ListView m_listView;
+	private ProgressBar m_progressBar;
 
 }

@@ -10,14 +10,13 @@ import java.util.List;
 import org.xmlpull.v1.XmlPullParserException;
 
 import android.os.AsyncTask;
-import android.util.Log;
 import br.ufrj.del.geform.bean.Form;
 import br.ufrj.del.geform.xml.FormXmlPull;
 
 /**
  * 
  */
-public class DownloadTask extends AsyncTask<URL, Void, Form> {
+public class DownloadTask extends AsyncTask<URL, Integer, Form> {
 
 	/*
 	 * (non-Javadoc)
@@ -29,11 +28,11 @@ public class DownloadTask extends AsyncTask<URL, Void, Form> {
 		try {
 			final URL url = urls[0];
 			form = download( url );
-		} catch( IOException e ) {
-			Log.e( "DownloadTask", e.getMessage() );
 		} catch( XmlPullParserException e ) {
-			Log.e( "DownloadTask", e.getMessage() );
+			e.printStackTrace();
 		} catch( ParseException e ) {
+			e.printStackTrace();
+		} catch( IOException e ) {
 			e.printStackTrace();
 		}
 

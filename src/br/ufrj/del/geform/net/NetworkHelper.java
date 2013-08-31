@@ -5,9 +5,7 @@ package br.ufrj.del.geform.net;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.concurrent.ExecutionException;
 
-import android.os.AsyncTask;
 import br.ufrj.del.geform.bean.Form;
 
 /**
@@ -22,22 +20,35 @@ public class NetworkHelper {
 	 * @param formId
 	 * @return
 	 */
-	public static Form downloadForm( long formId ) {
-		final DownloadTask downloadTask = new DownloadTask();
-		final String path = String.format("%s/%s", SERVER_URL, formId );
+	public void downloadForm( long formId ) {
+		final DownloadTask downloadTask = new DownloadTask() {
+			@Override
+			protected void onPreExecute() {
+				NetworkHelper.this.onPreExecute();
+			}
+			@Override
+			protected void onPostExecute( Form result ) {
+				NetworkHelper.this.onPostExecute( result );
+			}
+		};
+		final String path = String.format( "%s/%s", SERVER_URL, formId );
 		try {
 			final URL url = new URL( path );
-			final AsyncTask<URL, Void, Form> task = downloadTask.execute( url );
-			final Form form = task.get();
-			return form;
-		} catch( InterruptedException e ) {
-			e.printStackTrace();
-		} catch( ExecutionException e ) {
-			e.printStackTrace();
+			downloadTask.execute( url );
 		} catch( MalformedURLException e ) {
 			e.printStackTrace();
 		}
-		return null;
 	}
+
+	/**
+	 * 
+	 */
+	protected void onPreExecute() {}
+
+	/**
+	 * 
+	 * @param result
+	 */
+	protected void onPostExecute( Form result ) {}
 
 }
