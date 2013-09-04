@@ -12,6 +12,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import br.ufrj.del.geform.R;
 import br.ufrj.del.geform.database.CollectionsTable;
+import br.ufrj.del.geform.database.DatabaseHelper;
 import br.ufrj.del.geform.database.FormsTable;
 
 /**
@@ -53,8 +54,10 @@ public class FormAdapter extends CursorAdapter {
 
 		final TextView textViewCounterCollections = (TextView) view.findViewById( android.R.id.text2 );
 		final int counterCollectionsColumnIndex = cursor.getColumnIndex( CollectionsTable._COUNT );
+		final int toUpdateColumnIndex = cursor.getColumnIndex( DatabaseHelper.VIEW_COLUMN_COUNT );
 		final int counter = cursor.getInt( counterCollectionsColumnIndex );
-		String stringCounter = context.getString( R.string.counter_collections, counter );
+		final int toUpdate = cursor.getInt( toUpdateColumnIndex );
+		String stringCounter = context.getString( R.string.counter_collections, counter, toUpdate );
 		textViewCounterCollections.setText( stringCounter );
 	}
 

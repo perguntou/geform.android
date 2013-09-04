@@ -34,6 +34,6 @@
     <string name="no_options">No options</string>
     <string name="no_answer">Your answer goes here</string>
 
-    <string name="counter_collections">%s collected</string>
+    <string name="counter_collections">%1$s collected (%2$s to commit)</string>
 
 </resources>
