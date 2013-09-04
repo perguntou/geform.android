@@ -20,9 +20,28 @@ import br.ufrj.del.geform.bean.Form;
 public class DatabaseHelper extends SQLiteOpenHelper {
 
 	public static final String DATABASE_NAME = "geform.db";
-	public static final int DATABASE_VERSION = 2;
+	public static final int DATABASE_VERSION = 3;
 
 	public static final String FOREIGN_KEY_ENABLE = "PRAGMA foreign_keys = ON;";
+
+	public static final String SQLITE_BOOLEAN_TRUE = "1";
+	public static final String SQLITE_BOOLEAN_FALSE = "0";
+
+	public static final String VIEW = "viewer";
+	public static final String VIEW_COLUMN_COUNT = "view_count";
+	public static final String CREATE_VIEW = String.format( "create view if not exists %1$s as select f.%2$s, f.%3$s, count( distinct c.%4$s ) as %5$s from %6$s f left join %7$s c on f.%2$s = c.%8$s and c.%9$s = %10$s group by f.%2$s;",
+														VIEW,
+														FormsTable._ID,
+														FormsTable.COLUMN_TITLE,
+														CollectionsTable._COUNT,
+														VIEW_COLUMN_COUNT,
+														FormsTable.TABLE_FORMS,
+														CollectionsTable.TABLE_COLLECTION,
+														CollectionsTable.COLUMN_FORM_ID,
+														CollectionsTable.COLUMN_UPDATED,
+														SQLITE_BOOLEAN_FALSE );
+
+	public static final String DROP_VIEW = String.format( "drop view if exists %s;", VIEW );
 
 	private static DatabaseHelper m_instance;
 
@@ -55,6 +74,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 	public void onCreate( SQLiteDatabase database ) {
 		database.execSQL( FormsTable.CREATE );
 		database.execSQL( CollectionsTable.CREATE );
+		database.execSQL( CREATE_VIEW );
 	}
 
 	/*
@@ -76,6 +96,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 	@Override
 	public void onUpgrade( SQLiteDatabase database, int oldVersion, int newVersion ) {
 		Log.w( "database", "Upgrading database from version " + oldVersion	+ " to " + newVersion + ", which will destroy all old data" );
+		database.execSQL( DROP_VIEW );
 		database.execSQL( CollectionsTable.DROP );
 		database.execSQL( FormsTable.DROP );
 		onCreate( database );
@@ -166,15 +187,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 	 */
 	public Cursor getFormsTitleAndCounter() {
 		SQLiteDatabase db = m_instance.getReadableDatabase();
-		final String query = String.format( "select f.%s, f.%s, c.%s from %s f left join %s c on f.%s = c.%s group by %s;",
+		final String query = String.format( "select v.%1$s, v.%2$s, v.%3$s, c.%4$s from %5$s v left join %6$s c on v.%1$s = c.%7$s group by v.%1$s order by v.%2$s;",
 				FormsTable._ID,
 				FormsTable.COLUMN_TITLE,
+				VIEW_COLUMN_COUNT,
 				CollectionsTable._COUNT,
-				FormsTable.TABLE_FORMS,
+				VIEW,
 				CollectionsTable.TABLE_COLLECTION,
-				FormsTable._ID,
-				CollectionsTable.COLUMN_FORM_ID,
-				FormsTable.COLUMN_TITLE );
+				CollectionsTable.COLUMN_FORM_ID );
 		Cursor cursor = db.rawQuery( query, null );
 		cursor.moveToFirst();
 
@@ -217,8 +237,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 		final String selection;
 		final String[] selectionArgs;
 		if( filterUpdated ) {
-			 selection = String.format( "%s = ? and %s = ?", CollectionsTable.COLUMN_FORM_ID, CollectionsTable.COLUMN_UPDATED );
-			 selectionArgs = new String[] { formId.toString(), String.valueOf( filterUpdated ) };
+			selection = String.format( "%s = ? and %s = ?", CollectionsTable.COLUMN_FORM_ID, CollectionsTable.COLUMN_UPDATED );
+			selectionArgs = new String[] { formId.toString(), SQLITE_BOOLEAN_FALSE };
 		} else {
 			selection = String.format( "%s = ?", CollectionsTable.COLUMN_FORM_ID );
 			selectionArgs = new String[] { formId.toString() };
