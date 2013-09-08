@@ -2,11 +2,15 @@ package br.ufrj.del.geform.app;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.AlertDialog.Builder;
 import android.app.ListActivity;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcelable;
+import android.text.Editable;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -91,22 +95,39 @@ public class EditFormActivity extends ListActivity {
 		}
 		case R.id.menu_item_accept:
 		{
-			m_form.setTitle( ((EditText) findViewById( R.id.form_name )).getText().toString().trim() );
+			final EditText view = (EditText) findViewById( R.id.form_name );
 
-			final String title = m_form.title();
+			final Editable text = view.getText();
+			final String textAsString = text.toString();
+			final String title = textAsString.trim();
 			if( title.equals("") ) {
-				Toast.makeText( EditFormActivity.this, R.string.message_title_missing, Toast.LENGTH_LONG ).show();
-				return false;
+				final Toast toast = Toast.makeText( EditFormActivity.this, R.string.message_title_missing, Toast.LENGTH_LONG );
+				toast.show();
+				break;
 			}
+			m_form.setTitle( title );
+
 			if( m_form.size() <= 0 ) {
-				Toast.makeText( EditFormActivity.this, R.string.message_number_items_invalid, Toast.LENGTH_LONG ).show();
-				return false;
+				final Toast toast = Toast.makeText( EditFormActivity.this, R.string.message_number_items_invalid, Toast.LENGTH_LONG );
+				toast.show();
+				break;
 			}
 
-			final Intent intent = getIntent();
-			intent.putExtra( "form", (Parcelable) m_form );
-			setResult( Activity.RESULT_OK,  intent );
-			finish();
+			final Builder dialog = new AlertDialog.Builder( this );
+			dialog.setTitle( R.string.dialog_alert_title );
+			dialog.setMessage( R.string.dialog_alert_message );
+			dialog.setPositiveButton( android.R.string.ok, new DialogInterface.OnClickListener() {
+				@Override
+				public void onClick( DialogInterface dialog, int which ) {
+					final Intent intent = getIntent();
+					intent.putExtra( "form", (Parcelable) m_form );
+					setResult( Activity.RESULT_OK,  intent );
+					finish();
+				}
+			} );
+			dialog.setNegativeButton( android.R.string.cancel, null );
+			dialog.show();
+
 			break;
 		}
 		default:
