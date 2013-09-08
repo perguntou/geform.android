@@ -24,6 +24,9 @@
     <string name="title_activity_fill">Fill</string>
     <string name="title_activity_forms">FormsActivity</string>
 
+    <string name="dialog_alert_title">Confirm form creation</string>
+    <string name="dialog_alert_message">You can not modify it after creation.</string>
+
     <string name="menu_fromURL">From URL</string>
     <string name="menu_add">Add</string>
     <string name="menu_add_item">Add Item</string>
