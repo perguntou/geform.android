@@ -276,4 +276,27 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 		return result;
 	}
 
+	/**
+	 * 
+	 * @param formId
+	 */
+	public void setCollectionsUpdated( Long formId ) {
+		SQLiteDatabase db = m_instance.getWritableDatabase();
+		db.beginTransaction();
+		try {
+			final ContentValues content = new ContentValues();
+			content.put( CollectionsTable.COLUMN_UPDATED, SQLITE_BOOLEAN_TRUE );
+			final String whereClause = String.format( "%s = ? and %s = ?", CollectionsTable.COLUMN_FORM_ID, CollectionsTable.COLUMN_UPDATED );
+			db.update(
+					CollectionsTable.TABLE_COLLECTION,
+					content,
+					whereClause,
+					new String[] {formId.toString(), SQLITE_BOOLEAN_FALSE} );
+			db.execSQL( DROP_VIEW );
+			db.execSQL( CREATE_VIEW );
+		} finally {
+			db.endTransaction();
+		}
+	}
+
 }
