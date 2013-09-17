@@ -138,7 +138,7 @@ public class FormsActivity extends FragmentActivity {
 					m_progressBar.setVisibility( ProgressBar.VISIBLE );
 				}
 				@Override
-				protected void onPostExecute( Form result ) {
+				protected void onPostDownload( Form result ) {
 					item.setEnabled( true );
 					m_progressBar.setVisibility( ProgressBar.INVISIBLE );
 					if( result == null ) {
@@ -162,7 +162,8 @@ public class FormsActivity extends FragmentActivity {
 						} catch( NumberFormatException e ) {
 							final String format = getString( R.string.message_id_invalid );
 							final String msg = String.format( format, value );
-							Toast.makeText( context, msg, Toast.LENGTH_LONG ).show();
+							Toast toast = Toast.makeText( context, msg, Toast.LENGTH_LONG );
+							toast.show();
 						}
 					}
 				}
@@ -173,6 +174,37 @@ public class FormsActivity extends FragmentActivity {
 			args.putInt( EditDialog.ARGUMENT_INPUT_TYPE, InputType.TYPE_CLASS_NUMBER );
 			dialog.setArguments( args );
 			dialog.show( this.getSupportFragmentManager(), "" );
+			break;
+		}
+		case R.id.menu_collection_upload:
+		{
+			final DatabaseHelper dbHelper = DatabaseHelper.getInstance( this.getApplicationContext() );
+			final NetworkHelper network = new NetworkHelper() {
+				@Override
+				protected void onPreExecute() {
+					item.setEnabled( false );
+					m_progressBar.setVisibility( ProgressBar.VISIBLE );
+				}
+				@Override
+				protected void onPostUpload( final Long result ) {
+					item.setEnabled( true );
+					m_progressBar.setVisibility( ProgressBar.INVISIBLE );
+					if( result == Form.NO_ID ) {
+						final String msg = getString( R.string.message_collections_upload_error );
+						final Toast toast = Toast.makeText( context, msg, Toast.LENGTH_LONG );
+						toast.show();
+					}
+					dbHelper.setCollectionsUpdated( result );
+					updateAdapter();
+				}
+			};
+			final FormAdapter adapter = (FormAdapter) getListAdapter();
+			final int count = adapter.getCount();
+			for( int position = 0; position < count; ++position ) {
+				final Long id = adapter.getItemId( position );
+				final List<Collection> collections = dbHelper.getCollectionsByForm( id, true );
+				network.uploadCollections( collections, id );
+			}
 			break;
 		}
 		default:
