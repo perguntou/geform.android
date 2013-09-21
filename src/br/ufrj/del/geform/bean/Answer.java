@@ -18,7 +18,7 @@ public class Answer extends ArrayList<String> implements Parcelable {
 	public Answer() {
 		super();
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * @see android.os.Parcelable#describeContents()

@@ -20,6 +20,7 @@ import android.widget.Toast;
 import br.ufrj.del.geform.Constants;
 import br.ufrj.del.geform.R;
 import br.ufrj.del.geform.bean.Item;
+import br.ufrj.del.geform.bean.Option;
 import br.ufrj.del.geform.bean.Type;
 
 /**
@@ -116,7 +117,7 @@ public class EditItemActivity extends FragmentActivity {
 				Toast.makeText( getApplicationContext(),  R.string.message_question_missing, Toast.LENGTH_LONG ).show();
 				return false;
 			}
-			List<String> options = editOptionsFragment.getOptions();
+			List<Option> options = editOptionsFragment.getOptions();
 			final int typeOrdinal = itemTypeSpinner.getSelectedItemPosition();
 			final Type type = Type.values()[typeOrdinal];
 			m_item.setType( type );

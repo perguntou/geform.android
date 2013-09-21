@@ -20,6 +20,7 @@ import android.widget.TextView;
 import br.ufrj.del.geform.R;
 import br.ufrj.del.geform.bean.Answer;
 import br.ufrj.del.geform.bean.Item;
+import br.ufrj.del.geform.bean.Option;
 import br.ufrj.del.geform.bean.Type;
 
 /**
@@ -83,12 +84,12 @@ public class ItemFragment extends ListFragment {
 				);
 				break;
 			case SINGLE_CHOICE:
-				List<String> optionsSingle = item.getOptions();
-				adapter = new ArrayAdapter<String>( view.getContext(), android.R.layout.simple_list_item_single_choice, optionsSingle );
+				List<Option> optionsSingle = item.getOptions();
+				adapter = new ArrayAdapter<Option>( view.getContext(), android.R.layout.simple_list_item_single_choice, optionsSingle );
 				break;
 			case MULTIPLE_CHOICE:
-				List<String> optionsMultiple = item.getOptions();
-				adapter = new ArrayAdapter<String>( view.getContext(), android.R.layout.simple_list_item_multiple_choice, optionsMultiple );
+				List<Option> optionsMultiple = item.getOptions();
+				adapter = new ArrayAdapter<Option>( view.getContext(), android.R.layout.simple_list_item_multiple_choice, optionsMultiple );
 				break;
 				default:
 					throw new IllegalArgumentException( String.format("Invalid item Type (%s)",type) );

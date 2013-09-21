@@ -45,6 +45,7 @@ public class XmlElements {
 	 *
 	 */
 	public static enum Tag {
+		ID( "id" ),
 		FORM( "form" ),
 		TITLE( "title" ),
 		AUTHOR( "author" ),
@@ -54,6 +55,7 @@ public class XmlElements {
 		QUESTION( "question" ),
 		OPTIONS( "options" ),
 		OPTION( "option" ),
+		VALUE( "value" ),
 		COLLECTIONS( "collections" ),
 		COLLECTION( "collection" ),
 		ANSWER( "answer" );
