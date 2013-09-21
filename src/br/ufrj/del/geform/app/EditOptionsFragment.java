@@ -18,6 +18,7 @@ import android.widget.BaseAdapter;
 import android.widget.ListView;
 import br.ufrj.del.geform.R;
 import br.ufrj.del.geform.bean.Item;
+import br.ufrj.del.geform.bean.Option;
 
 /**
  *
@@ -27,7 +28,7 @@ public class EditOptionsFragment extends ListFragment {
 	public static final String FRAGMENT_TAG = "edit_option";
 	public static final String ARGUMENT_INDEX = "index";
 
-	private List<String> m_options;
+	private List<Option> m_options;
 	private MenuItem m_menuItem;
 
 	/*
@@ -37,14 +38,14 @@ public class EditOptionsFragment extends ListFragment {
 	@Override
     public View onCreateView( LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState ) {
 		final Item item = ((EditItemActivity) getActivity()).getItem();
-		List<String> options = item.getOptions();
-		m_options = (options != null) ? options : new ArrayList<String>();
+		List<Option> options = item.getOptions();
+		m_options = (options != null) ? options : new ArrayList<Option>();
 
 		View view = inflater.inflate( R.layout.edit_options, container, false );
 
 		setHasOptionsMenu( true );
 
-		setListAdapter( new ArrayAdapter<String>( view.getContext(), android.R.layout.simple_list_item_1, m_options ) );
+		setListAdapter( new ArrayAdapter<Option>( view.getContext(), android.R.layout.simple_list_item_1, m_options ) );
 
 		return view;
 	}
@@ -84,7 +85,9 @@ public class EditOptionsFragment extends ListFragment {
 	 */
 	@Override
 	public void onListItemClick( ListView listView, View view, int position, long id ) {
-		editOptionDialog( getListView().getItemAtPosition( position ).toString(), position );
+		final Option itemAtPosition = (Option) listView.getItemAtPosition( position );
+		final String value = itemAtPosition.getValue();
+		editOptionDialog( value, position );
 	}
 
 	/**
@@ -98,6 +101,7 @@ public class EditOptionsFragment extends ListFragment {
 			@Override
 			void onPositiveClick() {
 				final String inputValue = getInputValue();
+				final Option option = new Option( inputValue );
 				final Bundle args = getArguments();
 				final int position = args.getInt( ARGUMENT_INDEX );
 				final int size = m_options.size();
@@ -107,9 +111,9 @@ public class EditOptionsFragment extends ListFragment {
 					}
 				} else {
 					if( position < size ) {
-						m_options.set( position, inputValue );
+						m_options.set( position, option );
 					} else {
-						m_options.add( inputValue );
+						m_options.add( option );
 					}
 				}
 				((BaseAdapter) getListAdapter()).notifyDataSetChanged();
@@ -130,7 +134,7 @@ public class EditOptionsFragment extends ListFragment {
 	 * Returns the edited options
 	 * @return the options
 	 */
-	public List<String> getOptions() {
+	public List<Option> getOptions() {
 		return m_options;
 	}
 

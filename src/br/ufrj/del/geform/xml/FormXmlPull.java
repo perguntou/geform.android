@@ -20,6 +20,7 @@ import org.xmlpull.v1.XmlSerializer;
 import android.util.Log;
 import br.ufrj.del.geform.bean.Form;
 import br.ufrj.del.geform.bean.Item;
+import br.ufrj.del.geform.bean.Option;
 import br.ufrj.del.geform.bean.Type;
 import br.ufrj.del.geform.xml.XmlElements.Attribute;
 import br.ufrj.del.geform.xml.XmlElements.Tag;
@@ -216,7 +217,7 @@ public final class FormXmlPull extends AbstractXmlPull {
 				item.setQuestion( textQuestion );
 				break;
 			case OPTIONS:
-				final List<String> options = readOptions( parser );
+				final List<Option> options = readOptions( parser );
 				item.setOptions( options );
 				break;
 			default:
@@ -259,8 +260,8 @@ public final class FormXmlPull extends AbstractXmlPull {
 	 * @throws IOException
 	 * @see XmlPullParser
 	 */
-	private static List<String> readOptions( XmlPullParser parser ) throws XmlPullParserException, IOException {
-		List<String> options = new ArrayList<String>();
+	private static List<Option> readOptions( XmlPullParser parser ) throws XmlPullParserException, IOException {
+		List<Option> options = new ArrayList<Option>();
 
 		parser.require( XmlPullParser.START_TAG, namespace, Tag.OPTIONS.toString() );
 		while( parser.next() != XmlPullParser.END_TAG ) {
@@ -271,7 +272,7 @@ public final class FormXmlPull extends AbstractXmlPull {
 			final Tag tag = Tag.fromString( name );
 			switch( tag ) {
 			case OPTION:
-				final String option = readOption(parser);
+				final Option option = readOption(parser);
 				options.add( option );
 				break;
 			default:
@@ -296,11 +297,11 @@ public final class FormXmlPull extends AbstractXmlPull {
 	 * @throws IOException
 	 * @see XmlSerializer
 	 */
-	private static void writeOptions( List<String> options, XmlSerializer serializer ) throws IllegalArgumentException, IllegalStateException, IOException {
+	private static void writeOptions( List<Option> options, XmlSerializer serializer ) throws IllegalArgumentException, IllegalStateException, IOException {
 		serializer.startTag( namespace, Tag.OPTIONS.toString() );
-		Iterator<String> it = options.iterator();
+		Iterator<Option> it = options.iterator();
 		while( it.hasNext() ) {
-			final String option = it.next();
+			final Option option = it.next();
 			writeOption( option, serializer );
 		}
 		serializer.endTag( namespace, Tag.OPTIONS.toString() );
@@ -313,11 +314,40 @@ public final class FormXmlPull extends AbstractXmlPull {
 	 * @throws IOException
 	 * @throws XmlPullParserException
 	 */
-	private static String readOption( XmlPullParser parser ) throws XmlPullParserException, IOException
+	private static Option readOption( XmlPullParser parser ) throws XmlPullParserException, IOException
 	{
 		parser.require( XmlPullParser.START_TAG, namespace, Tag.OPTION.toString() );
-		final String value = readText( parser );
-		final String option = value.trim();
+
+		final Option option = new Option();
+		while( parser.next() != XmlPullParser.END_TAG ) {
+			if( parser.getEventType() != XmlPullParser.START_TAG ) {
+				continue;
+			}
+			String name = parser.getName();
+			final Tag tag = Tag.fromString( name );
+			switch( tag ) {
+			case ID:
+			{
+				final String text = readText( parser );
+				final Long id = Long.getLong( text, Option.NO_ID );
+				option.setId( id );
+				break;
+			}
+			case VALUE:
+			{
+				final String text = readText( parser );
+				final String value = text.trim();
+				option.setValue( value );
+				break;
+			}
+			default:
+				final String logTag = String.format( "%s.%s", FormXmlPull.class.getName(), FormXmlPull.class.getEnclosingMethod().getName() );
+				if( Log.isLoggable( logTag, Log.WARN ) ) {
+					final String message = String.format( "Case %s not handled in this switch.", tag );
+					Log.w( logTag, message );
+				}
+			}
+		}
 		parser.require( XmlPullParser.END_TAG, namespace, Tag.OPTION.toString() );
 
 		return option;
@@ -331,11 +361,20 @@ public final class FormXmlPull extends AbstractXmlPull {
 	 * @throws IllegalStateException
 	 * @throws IOException
 	 */
-	private static void writeOption( String option, XmlSerializer serializer ) throws IllegalArgumentException, IllegalStateException, IOException
+	private static void writeOption( Option option, XmlSerializer serializer ) throws IllegalArgumentException, IllegalStateException, IOException
 	{
-		serializeSimpleTextElement( option, Tag.OPTION, serializer );
+		serializer.startTag( namespace, Tag.OPTION.toString() );
+
+		final Long id = option.getId();
+		if( id != Option.NO_ID ) {
+			serializeSimpleTextElement( id.toString(), Tag.ID, serializer );
+		}
+		final String value = option.getValue();
+		serializeSimpleTextElement( value, Tag.VALUE, serializer );
+
+		serializer.endTag( namespace, Tag.OPTION.toString() );
 	}
-	
+
 	/**
 	 * Internal method that extracts text values.
 	 * @param parser the responsible for parsing.
