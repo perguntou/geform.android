@@ -122,7 +122,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 		} finally {
 			db.endTransaction();
 		}
-		return id; 
+		return id;
 	}
 
 	/**
@@ -132,7 +132,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 	 */
 	public void insertCollection ( Collection collection ) throws SQLException {
 		final Form reference = collection.getReference();
-		final Long formId = reference.id();
+		final Long formId = reference.getId();
 		final int count = getCollectionCount( formId );
 
 		SQLiteDatabase db = m_instance.getWritableDatabase();

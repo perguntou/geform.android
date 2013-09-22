@@ -13,6 +13,7 @@ import br.ufrj.del.geform.R;
 import br.ufrj.del.geform.bean.Answer;
 import br.ufrj.del.geform.bean.Collection;
 import br.ufrj.del.geform.bean.Form;
+import br.ufrj.del.geform.bean.Item;
 
 /**
  *
@@ -70,7 +71,8 @@ public class FormPagerAdapter extends FragmentStatePagerAdapter {
 
 		Bundle args = new Bundle();
 		args.putInt( ItemFragment.ARG_POSITION, index );
-		args.putParcelable( ItemFragment.ARG_ITEM, form.get(index) );
+		final Item item = form.get( index );
+		args.putParcelable( ItemFragment.ARG_ITEM, item );
 		args.putParcelable( ItemFragment.ARG_ANSWER, answer );
 
 		fragment.setArguments( args );

@@ -1,50 +1,36 @@
 package br.ufrj.del.geform.bean;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 
 import android.os.Parcel;
 import android.os.Parcelable;
 
 /**
- * This class extends ArrayList< {@link Item} >.
- * @see ArrayList
+ * This class extends {@link IdentifiableBean}.
  */
-public class Form extends ArrayList<Item> implements Parcelable {
-
-	/*
-	 * default serial version ID
-	 */
-	private static final long serialVersionUID = 1L;
-
-	/*
-	 * initial form ID (not assigned)
-	 */
-	public static final long NO_ID = -1;
+public class Form extends IdentifiableBean implements Parcelable {
 
 	/*
 	 * the form title.
 	 */
 	private String m_title;
 
-	/*
-	 * the form's unique identifier
-	 */
-	private Long m_id = Long.valueOf( NO_ID );
-
-	private String m_author;
+	private String m_creator;
 
 	private String m_description;
 
 	private Date m_timestamp;
+
+	private List<Item> m_items;
 
 	/**
 	 * Constructs a new Form instance with zero initial capacity
 	 * and no title.
 	 */
 	public Form() {
-		this( new String("") );
+		this( new String(), new ArrayList<Item>() );
 	}
 
 	/**
@@ -54,9 +40,9 @@ public class Form extends ArrayList<Item> implements Parcelable {
 	 * @param items the collection of items to add.
 	 * @see Item
 	 */
-	public Form( String title, Collection<? extends Item> items ) {
-		super( items );
-		setTitle( title );
+	public Form( String title, List<Item> items ) {
+		this.setTitle( title );
+		this.setItems( items );
 	}
 
 	/**
@@ -73,7 +59,7 @@ public class Form extends ArrayList<Item> implements Parcelable {
 	 *	Returns the form title.
 	 *	@return the form title.
 	 */
-	public String title() { return m_title; }
+	public String getTitle() { return m_title; }
 
 	/**
 	 *	Sets the form title.
@@ -82,35 +68,17 @@ public class Form extends ArrayList<Item> implements Parcelable {
 	public void setTitle( String title ) { m_title = title; }
 
 	/**
-	 *	Returns the form identifier.
-	 *	@return the form ID.
+	 * @return the creator
 	 */
-	public Long id() { return m_id; }
-
-	/**
-	 *	Sets the form's unique identifier.
-	 *	@param	id the form ID.
-	 */
-	public void setId( Long id ) {
-		//FIXME ID should be assigned only once
-		//but the form's copy ID must be reset
-		//when clone() is called.
-//		Assert.assertTrue( , m_id == NO_ID );
-		m_id = id;
+	public String getCreator() {
+		return m_creator;
 	}
 
 	/**
-	 * @return the author
+	 * @param creator the creator to set
 	 */
-	public String getAuthor() {
-		return m_author;
-	}
-
-	/**
-	 * @param author the author to set
-	 */
-	public void setAuthor( String author ) {
-		m_author = author;
+	public void setCreator( String creator ) {
+		m_creator = creator;
 	}
 
 	/**
@@ -142,15 +110,94 @@ public class Form extends ArrayList<Item> implements Parcelable {
 	}
 
 	/**
+	 * @return the items
+	 */
+	public List<Item> getItems() {
+		return m_items;
+	}
+
+	/**
+	 * @param items the items to set
+	 */
+	public void setItems( List<Item> items ) {
+		this.m_items = items;
+	}
+
+	/**
+	 * 
+	 * @param item
+	 */
+	public void add( final Item item ) {
+		final List<Item> items = this.getItems();
+		items.add( item );
+	}
+
+	/**
+	 * 
+	 * @param position
+	 * @param item
+	 */
+	public void add( int position, final Item item ) {
+		final List<Item> items = this.getItems();
+		items.add( position, item );
+	}
+
+	/**
+	 * Replaces the element at the specified position in the item's list with the specified item.
+	 * This operation does not change the size of the items.
+	 * @param position the index at which to put the specified item.
+	 * @param item the item to insert.
+	 * @return the previous item at the position.
+	 */
+	public Item set( int position, final Item item ) {
+		final List<Item> items = this.getItems();
+		final Item previousItem = items.set( position, item );
+		return previousItem;
+	}
+
+	/**
+	 * 
+	 * @param position
+	 */
+	public Item get( int position ) {
+		final List<Item> items = this.getItems();
+		final Item item = items.get( position );
+		return item;
+	}
+
+	/**
+	 * 
+	 * @param position
+	 * @return
+	 */
+	public Item remove( int position ) {
+		final List<Item> items = this.getItems();
+		final Item item = items.remove( position );
+		return item;
+	}
+
+	/**
+	 * 
+	 * @return
+	 */
+	public int size() {
+		final List<Item> items = this.getItems();
+		final int size = items.size();
+		return size;
+	}
+
+	/**
 	 * Returns a new Form with the same elements, the same size,
 	 * the same capacity as this Form but no ID.
 	 * @return a shallow copy of this Form.
 	 */
 	@Override
 	public Object clone() {
-		Form cp = (Form) super.clone();
-		cp.setTitle( this.title() + "_cp" );
-		cp.setId( NO_ID );
+		Form cp = new Form();
+		final String copyTitle = String.format( "%s_cp", this.getTitle() );
+		cp.setTitle( copyTitle );
+		cp.setDescription( this.getDescription() );
+		cp.setItems( this.getItems() );
 		return cp;
 	}
 
@@ -169,9 +216,14 @@ public class Form extends ArrayList<Item> implements Parcelable {
 	 */
 	@Override
 	public void writeToParcel( Parcel out, int flags ) {
-		out.writeString( this.title() );
-		out.writeLong( this.m_id );
-		out.writeTypedList( this );
+		super.writeToParcel( out, flags );
+		out.writeString( this.getTitle() );
+		out.writeString( this.getCreator() );
+		out.writeString( this.getDescription() );
+		final Date timestamp = this.getTimestamp();
+		final Long time = timestamp == null ? null : timestamp.getTime();
+		out.writeValue( time );
+		out.writeTypedList( this.getItems() );
 	}
 
 	public static final Parcelable.Creator<Form> CREATOR
@@ -199,9 +251,20 @@ public class Form extends ArrayList<Item> implements Parcelable {
 	 * @param in the Parcel
 	 */
 	private Form( Parcel in ) {
-		this.m_title = in.readString();
-		this.m_id = in.readLong();
-		in.readTypedList( this, Item.CREATOR );
+		super( in );
+		final String title = in.readString();
+		this.setTitle( title );
+		final String creator = in.readString();
+		this.setCreator( creator );
+		final String description = in.readString();
+		this.setDescription( description );
+		final Long time = (Long) in.readValue( Long.class.getClassLoader() );
+		if( time != null ) {
+			final Date timestamp = new Date( time );
+			this.setTimestamp( timestamp );
+		}
+		final List<Item> items = in.createTypedArrayList( Item.CREATOR );
+		this.setItems( items );
 	}
 
 }

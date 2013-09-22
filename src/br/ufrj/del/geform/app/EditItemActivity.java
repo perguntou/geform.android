@@ -129,7 +129,7 @@ public class EditItemActivity extends FragmentActivity {
 				}
 				m_item.setOptions( options );
 			} else {
-				m_item.getOptions().clear();
+				m_item.setOptions( null );
 			}
 
 			Intent intent = getIntent();

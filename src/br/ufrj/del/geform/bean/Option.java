@@ -9,14 +9,8 @@ import android.os.Parcelable;
 /**
  *
  */
-public class Option implements Parcelable {
+public class Option extends IdentifiableBean implements Parcelable {
 
-	/*
-	 * initial option ID (not assigned)
-	 */
-	public static final long NO_ID = -1;
-
-	private Long m_id = NO_ID;
 	private String m_value;
 
 	public Option() {
@@ -32,20 +26,6 @@ public class Option implements Parcelable {
 	}
 
 	/**
-	 * @return the id
-	 */
-	public Long getId() {
-		return m_id;
-	}
-
-	/**
-	 * @param id the id to set
-	 */
-	public void setId( Long id ) {
-		this.m_id = id;
-	}
-
-	/**
 	 * @return the value
 	 */
 	public String getValue() {
@@ -55,7 +35,7 @@ public class Option implements Parcelable {
 	/**
 	 * @param value the value to set
 	 */
-	public void setValue( String value ) {
+	public void setValue( final String value ) {
 		this.m_value = value;
 	}
 
@@ -74,7 +54,7 @@ public class Option implements Parcelable {
 	 */
 	@Override
 	public void writeToParcel( Parcel out, int flags ) {
-		out.writeLong( this.getId() );
+		super.writeToParcel( out, flags );
 		out.writeString( this.getValue() );
 	}
 
@@ -93,7 +73,7 @@ public class Option implements Parcelable {
 		 * @see android.os.Parcelable.Creator#newArray(int)
 		 */
 		@Override
-		public Option[] newArray(int size) {
+		public Option[] newArray( int size ) {
 			return new Option[size];
 		}
 	};
@@ -103,8 +83,7 @@ public class Option implements Parcelable {
 	 * @param in the Parcel
 	 */
 	public Option( Parcel in ) {
-		final Long id = in.readLong();
-		this.setId( id );
+		super( in );
 		final String value = in.readString();
 		this.setValue( value );
 	}

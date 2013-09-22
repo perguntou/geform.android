@@ -242,7 +242,8 @@ public class FormsActivity extends FragmentActivity {
 	 */
 	private void insertForm( Form form ) {
 		final DatabaseHelper dbHelper = DatabaseHelper.getInstance( this.getApplicationContext() );
-		final Long id = dbHelper.insertForm( form.title() );
+		final String title = form.getTitle();
+		final Long id = dbHelper.insertForm( title );
 		try {
 			final File directory = getDir( "forms", FragmentActivity.MODE_PRIVATE );
 			final String path = String.format( "%s%s%s.%s", directory, File.separator, id, Constants.extension );

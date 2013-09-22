@@ -1,6 +1,6 @@
 package br.ufrj.del.geform.app;
 
-import java.util.ArrayList;
+import java.util.List;
 
 import android.app.Activity;
 import android.content.Context;
@@ -17,7 +17,7 @@ import br.ufrj.del.geform.bean.Item;
  */
 public class ItemAdapter extends ArrayAdapter<Item> {
 
-	private ArrayList<Item> itemsData;
+	private List<Item> itemsData;
 	private Activity context;
 
 	/**
@@ -26,7 +26,7 @@ public class ItemAdapter extends ArrayAdapter<Item> {
 	 * @param textViewResourceId
 	 * @param itemsData
 	 */
-	public ItemAdapter( Activity context, int textViewResourceId, ArrayList<Item> itemsData ) {
+	public ItemAdapter( Activity context, int textViewResourceId, List<Item> itemsData ) {
 		super(context, textViewResourceId, itemsData);
 		this.context = context;
 		this.itemsData = itemsData;
