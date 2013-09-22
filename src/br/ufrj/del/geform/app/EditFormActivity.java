@@ -51,6 +51,9 @@ public class EditFormActivity extends ListActivity {
 		final String title = m_form.getTitle();
 		((EditText) findViewById( R.id.form_name )).setText( title );
 
+		final String description = m_form.getDescription();
+		((EditText) findViewById( R.id.form_description )).setText( description );
+
 		final List<Item> items = m_form.getItems();
 		setListAdapter( new ItemAdapter( this, android.R.layout.simple_list_item_1, items ) );
 	}
@@ -99,11 +102,11 @@ public class EditFormActivity extends ListActivity {
 		}
 		case R.id.menu_item_accept:
 		{
-			final EditText view = (EditText) findViewById( R.id.form_name );
+			final EditText titleView = (EditText) findViewById( R.id.form_name );
 
-			final Editable text = view.getText();
-			final String textAsString = text.toString();
-			final String title = textAsString.trim();
+			final Editable textTitle = titleView.getText();
+			final String textTitleAsString = textTitle.toString();
+			final String title = textTitleAsString.trim();
 			if( title.equals("") ) {
 				final Toast toast = Toast.makeText( EditFormActivity.this, R.string.message_title_missing, Toast.LENGTH_LONG );
 				toast.show();
@@ -116,6 +119,13 @@ public class EditFormActivity extends ListActivity {
 				toast.show();
 				break;
 			}
+
+			final EditText descriptionView = (EditText) findViewById( R.id.form_description );
+			final Editable textDescription = descriptionView.getText();
+			final String textDescriptionAsString = textDescription.toString();
+			final String description = textDescriptionAsString.trim();
+			final String descriptionToUse = description.equals("") ?  null : description;
+			m_form.setDescription( descriptionToUse );
 
 			final Builder dialog = new AlertDialog.Builder( this );
 			dialog.setTitle( R.string.dialog_alert_title );
