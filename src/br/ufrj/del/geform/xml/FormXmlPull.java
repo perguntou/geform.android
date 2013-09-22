@@ -213,6 +213,11 @@ public final class FormXmlPull extends AbstractXmlPull {
 			String name = parser.getName();
 			final Tag tag = Tag.fromString( name );
 			switch( tag ) {
+			case ID:
+				final String textId = readText( parser );
+				final long id = Long.getLong( textId, Item.NO_ID ); 
+				item.setId( id );
+				break;
 			case QUESTION:
 				final String textQuestion = readText( parser );
 				item.setQuestion( textQuestion );
@@ -246,6 +251,10 @@ public final class FormXmlPull extends AbstractXmlPull {
 		serializer.startTag( namespace, Tag.ITEM.toString() );
 		final Type type = item.getType();
 		serializer.attribute( namespace, Attribute.TYPE.toString(), type.toString() );
+		final long id = item.getId();
+		if( id != Item.NO_ID ) {
+			serializeSimpleTextElement( String.valueOf( id ), Tag.ID, serializer );
+		}
 		serializeSimpleTextElement( item.getQuestion(), Tag.QUESTION, serializer );
 		if( item.hasOptions() ) {
 			writeOptions( item.getOptions(), serializer );
@@ -329,8 +338,8 @@ public final class FormXmlPull extends AbstractXmlPull {
 			switch( tag ) {
 			case ID:
 			{
-				final String text = readText( parser );
-				final Long id = Long.getLong( text, Option.NO_ID );
+				final String textId = readText( parser );
+				final long id = Long.getLong( textId, Option.NO_ID );
 				option.setId( id );
 				break;
 			}
@@ -366,9 +375,9 @@ public final class FormXmlPull extends AbstractXmlPull {
 	{
 		serializer.startTag( namespace, Tag.OPTION.toString() );
 
-		final Long id = option.getId();
+		final long id = option.getId();
 		if( id != Option.NO_ID ) {
-			serializeSimpleTextElement( id.toString(), Tag.ID, serializer );
+			serializeSimpleTextElement( String.valueOf( id ), Tag.ID, serializer );
 		}
 		final String value = option.getValue();
 		serializeSimpleTextElement( value, Tag.VALUE, serializer );

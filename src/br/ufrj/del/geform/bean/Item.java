@@ -8,7 +8,7 @@ import android.os.Parcelable;
 /**
  * 
  */
-public class Item implements Parcelable {
+public class Item extends IdentifiableBean implements Parcelable {
 
 	private String m_question;
 	private Type m_type;
@@ -105,8 +105,10 @@ public class Item implements Parcelable {
 	 */
 	@Override
 	public void writeToParcel( Parcel out, int flags ) {
+		super.writeToParcel( out, flags );
 		out.writeString( this.getQuestion() );
-		out.writeString( this.getType().toString() );
+		final Type type = this.getType();
+		out.writeString( type.toString() );
 		out.writeTypedList( this.getOptions() );
 	}
 
@@ -135,6 +137,7 @@ public class Item implements Parcelable {
 	 * @param in the Parcel
 	 */
 	private Item( Parcel in ) {
+		super( in );
 		final String question = in.readString();
 		this.setQuestion( question );
 		final String typeString = in.readString();
