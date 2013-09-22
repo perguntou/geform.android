@@ -48,7 +48,7 @@ public class XmlElements {
 		ID( "id" ),
 		FORM( "form" ),
 		TITLE( "title" ),
-		AUTHOR( "author" ),
+		CREATOR( "creator" ),
 		DESCRIPTION( "description" ),
 		TIMESTAMP( "timestamp" ),
 		ITEM( "item" ),

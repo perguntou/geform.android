@@ -14,7 +14,7 @@ import android.os.Parcelable;
 public abstract class IdentifiableBean implements Parcelable {
 
 	/*
-	 * initial option ID (not assigned)
+	 * initial ID (not assigned)
 	 */
 	public static final long NO_ID = -1;
 

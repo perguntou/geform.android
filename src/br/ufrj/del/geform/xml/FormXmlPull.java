@@ -123,9 +123,9 @@ public final class FormXmlPull extends AbstractXmlPull {
 				final String textTitle = readText( parser );
 				form.setTitle( textTitle );
 				break;
-			case AUTHOR:
-				final String textAuthor = readText( parser );
-				form.setAuthor( textAuthor );
+			case CREATOR:
+				final String creator = readText( parser );
+				form.setCreator( creator );
 				break;
 			case DESCRIPTION:
 				final String textDescription = readText( parser );
@@ -172,17 +172,18 @@ public final class FormXmlPull extends AbstractXmlPull {
 			final String stringTs = dateFormat.format( timestamp );
 			serializeSimpleTextElement( stringTs, Tag.TIMESTAMP, serializer );
 		}
-		final String author = form.getAuthor();
-		if( author != null ) {
-			serializeSimpleTextElement( author, Tag.AUTHOR, serializer );
+		final String creator = form.getCreator();
+		if( creator != null ) {
+			serializeSimpleTextElement( creator, Tag.CREATOR, serializer );
 		}
-		final String title = form.title();
+		final String title = form.getTitle();
 		serializeSimpleTextElement( title, Tag.TITLE, serializer );
 		final String description = form.getDescription();
 		if( description != null ) {
 			serializeSimpleTextElement( description, Tag.DESCRIPTION, serializer );
 		}
-		for( Item item : form ) {
+		final List<Item> items = form.getItems();
+		for( Item item : items ) {
 			writeItem( item, serializer );
 		}
 

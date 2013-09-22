@@ -1,5 +1,7 @@
 package br.ufrj.del.geform.app;
 
+import java.util.List;
+
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -46,9 +48,11 @@ public class EditFormActivity extends ListActivity {
 
 		m_form = getIntent().getParcelableExtra( "form" );
 
-		((EditText) findViewById( R.id.form_name )).setText( m_form.title() );
+		final String title = m_form.getTitle();
+		((EditText) findViewById( R.id.form_name )).setText( title );
 
-		setListAdapter( new ItemAdapter( this, android.R.layout.simple_list_item_1, m_form ) );
+		final List<Item> items = m_form.getItems();
+		setListAdapter( new ItemAdapter( this, android.R.layout.simple_list_item_1, items ) );
 	}
 
 	/*

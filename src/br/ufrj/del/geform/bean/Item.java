@@ -1,8 +1,6 @@
 package br.ufrj.del.geform.bean;
 
-import java.util.ArrayList;
 import java.util.List;
-
 
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -30,26 +28,29 @@ public class Item implements Parcelable {
 	 * @param question the item's question.
 	 */
 	public Item( String question ) {
-		this( question, new ArrayList<Option>() );
+		this( question, null, Type.TEXT );
 	}
 
 	/**
-	 * Constructs a new Item instance with the specified title
-	 * and options.
-	 * @param title the form title.
-	 * @param options the form's options.
+	 * Constructs a new Item instance with the specified title,
+	 * options and type.
+	 * @param question the item question
+	 * @param options the item options
+	 * @param type the item type
+	 * @see Option
+	 * @see Type
 	 */
-	public Item( String question, List<Option> options ) {
-		setQuestion( question );
-		setOptions( options );
-		setType( Type.TEXT );
+	public Item( final String question, final List<Option> options, final Type type ) {
+		this.setQuestion( question );
+		this.setOptions( options );
+		this.setType( type );
 	}
 
 	/**
 	 * Returns the Item's question.
 	 * @return the question.
 	 */
-	public String getQuestion( ) { return m_question; }
+	public String getQuestion() { return m_question; }
 
 	/**
 	 * Sets the item's question.
@@ -65,13 +66,13 @@ public class Item implements Parcelable {
 	/**
 	 * @param type the type to set
 	 */
-	public void setType(Type type) { m_type = type; }
+	public void setType( Type type ) { m_type = type; }
 
 	/**
 	 * Returns the item's options.
 	 * @return the item's options.
 	 */
-	public List<Option> getOptions( ) { return m_options; }
+	public List<Option> getOptions() { return m_options; }
 
 	/**
 	 * Sets the item's options.
@@ -83,7 +84,11 @@ public class Item implements Parcelable {
 	 * Returns if this Item has options.
 	 * @return true if this Item has no options, false otherwise.
 	 */
-	public boolean hasOptions( ) { return !m_options.isEmpty(); }
+	public boolean hasOptions() {
+		final List<Option> options = this.getOptions();
+		final boolean hasOptions = options != null && !options.isEmpty(); 
+		return hasOptions;
+	}
 
 	/*
 	 * (non-Javadoc)
@@ -130,11 +135,13 @@ public class Item implements Parcelable {
 	 * @param in the Parcel
 	 */
 	private Item( Parcel in ) {
-		this();
-		this.m_question = in.readString();
+		final String question = in.readString();
+		this.setQuestion( question );
 		final String typeString = in.readString();
-		this.m_type = Type.fromValue( typeString );
-		in.readTypedList( this.m_options, Option.CREATOR );
+		final Type type = Type.fromValue( typeString );
+		this.setType( type );
+		final List<Option> options = in.createTypedArrayList( Option.CREATOR );
+		this.setOptions( options );
 	}
 
 }

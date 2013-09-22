@@ -1,5 +1,7 @@
 package br.ufrj.del.geform.app;
 
+import java.util.List;
+
 import android.annotation.SuppressLint;
 import android.app.ListActivity;
 import android.content.Context;
@@ -15,6 +17,7 @@ import android.widget.Toast;
 import br.ufrj.del.geform.R;
 import br.ufrj.del.geform.bean.Collection;
 import br.ufrj.del.geform.bean.Form;
+import br.ufrj.del.geform.bean.Item;
 import br.ufrj.del.geform.database.DatabaseHelper;
 
 /**
@@ -43,9 +46,11 @@ public class FillFormActivity extends ListActivity {
 		m_collection = getIntent().getParcelableExtra( "collection" );
 
 		final Form form = m_collection.getReference();
-		((TextView) findViewById( R.id.text_form_name )).setText( form.title() );
+		final String title = form.getTitle();
+		((TextView) findViewById( R.id.text_form_name )).setText( title );
 
-		setListAdapter( new ItemAdapter( this, android.R.layout.simple_list_item_1, form ) );
+		final List<Item> items = form.getItems();
+		setListAdapter( new ItemAdapter( this, android.R.layout.simple_list_item_1, items ) );
 	}
 
 	/*
