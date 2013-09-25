@@ -9,6 +9,7 @@ public class Collection implements Parcelable {
 
 	private Form m_reference;
 	private SparseArray<Answer> m_collection;
+	private String m_collector;
 
 	/**
 	 * 
@@ -31,6 +32,20 @@ public class Collection implements Parcelable {
 	 */
 	public void setReference( Form reference ) {
 		this.m_reference = reference;
+	}
+
+	/**
+	 * @return the collector
+	 */
+	public String getCollector() {
+		return m_collector;
+	}
+
+	/**
+	 * @param collector the collector to set
+	 */
+	public void setCollector( String collector ) {
+		this.m_collector = collector;
 	}
 
 	/**
@@ -120,9 +135,10 @@ public class Collection implements Parcelable {
 	 */
 	@Override
 	public void writeToParcel( Parcel out, int flags ) {
-		out.writeParcelable( this.m_reference, flags );
+		out.writeParcelable( this.getReference(), flags );
+		out.writeString( this.getCollector() );
 		final Bundle bundle = new Bundle( Answer.class.getClassLoader() );
-		bundle.putSparseParcelableArray( "collection", this.m_collection );
+		bundle.putSparseParcelableArray( "collection", this.getCollection() );
 		out.writeBundle( bundle );
 	}
 
@@ -151,10 +167,13 @@ public class Collection implements Parcelable {
 	 * @param in the Parcel
 	 */
 	private Collection( Parcel in ) {
-		m_reference = in.readParcelable( Form.class.getClassLoader() );
-		final Bundle bundle = in.readBundle();
-		bundle.setClassLoader( Answer.class.getClassLoader() );
-		m_collection = bundle.getSparseParcelableArray( "collection" );
+		final Form reference = in.readParcelable( Form.class.getClassLoader() );
+		this.setReference( reference );
+		final String collector = in.readString();
+		this.setCollector( collector );
+		final Bundle bundle = in.readBundle( Answer.class.getClassLoader() );
+		final SparseArray<Answer> collection = bundle.getSparseParcelableArray( "collection" );
+		this.setCollection( collection );
 	}
 
 }

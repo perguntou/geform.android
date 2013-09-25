@@ -95,6 +95,10 @@ public final class CollectionXmlPull extends AbstractXmlPull {
 		final Form form = collection.getReference();
 		final Long formId = form.getId();
 		serializeSimpleTextElement( formId.toString(), Tag.FORM, serializer );
+		final String collector = collection.getCollector();
+		if( collector != null ) {
+			serializeSimpleTextElement( collector, Tag.COLLECTOR, serializer );
+		}
 		for( int position = 0; position < collection.size(); ++position ) {
 			final Answer answer = collection.get( position );
 			if( answer.isEmpty() ) {
