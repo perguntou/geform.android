@@ -56,6 +56,7 @@ public class XmlElements {
 		OPTIONS( "options" ),
 		OPTION( "option" ),
 		VALUE( "value" ),
+		COLLECTOR( "collector" ),
 		COLLECTIONS( "collections" ),
 		COLLECTION( "collection" ),
 		ANSWER( "answer" );
