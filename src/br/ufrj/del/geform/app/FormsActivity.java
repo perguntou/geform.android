@@ -11,11 +11,15 @@ import java.util.List;
 
 import org.xmlpull.v1.XmlPullParserException;
 
+import android.app.AlertDialog;
+import android.app.AlertDialog.Builder;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.os.Bundle;
-import android.os.Parcelable;
+import android.preference.PreferenceManager;
 import android.support.v4.app.FragmentActivity;
 import android.text.InputType;
 import android.view.LayoutInflater;
@@ -29,6 +33,7 @@ import android.widget.HeaderViewListAdapter;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 import br.ufrj.del.geform.Constants;
 import br.ufrj.del.geform.R;
@@ -44,6 +49,10 @@ public class FormsActivity extends FragmentActivity {
 	private static final int COLLECT_DATA = 0;
 	private static final int CREATE_FORM = 1;
 
+	private ListView m_listView;
+	private TextView m_headerTextView;
+	private ProgressBar m_progressBar;
+
 	/*
 	 * (non-Javadoc)
 	 * @see android.app.Activity#onCreate(android.os.Bundle)
@@ -56,6 +65,7 @@ public class FormsActivity extends FragmentActivity {
 
 		final LayoutInflater layoutInflater = getLayoutInflater();
 		final View header = layoutInflater.inflate( R.layout.header_forms, null );
+
 		final ListView listView = (ListView) findViewById( android.R.id.list );
 		m_progressBar = (ProgressBar) findViewById( android.R.id.progress );
 		listView.setOnItemClickListener( new OnItemClickListener() {
@@ -101,6 +111,56 @@ public class FormsActivity extends FragmentActivity {
 		final ListAdapter adapter = new FormAdapter( context, cursor );
 
 		setListAdapter( adapter );
+
+		final String userPreference = getUserIdentification();
+		if( userPreference == null ) {
+			final Builder dialog = new AlertDialog.Builder( this );
+			dialog.setTitle( R.string.dialog_alert_user_undefined_title );
+			dialog.setMessage( R.string.dialog_alert_user_undefined_message );
+			dialog.setPositiveButton( R.string.title_activity_settings, new DialogInterface.OnClickListener() {
+				@Override
+				public void onClick( DialogInterface dialog, int which ) {
+					editSettings( context );
+				}
+			} );
+			dialog.setNegativeButton( android.R.string.cancel, null );
+			dialog.show();
+		}
+
+		m_headerTextView = (TextView) header.findViewById( R.id.label_forms );
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see android.support.v4.app.FragmentActivity#onResume()
+	 */
+	@Override
+	protected void onResume() {
+		super.onResume();
+		final String userPreference = getUserIdentification();
+		final String user;
+		if( userPreference == null ) {
+			user = this.getString( R.string.default_user );
+		} else {
+			user = userPreference;
+		}
+
+		updateHeaderTextView( user );
+	}
+
+	/**
+	 * 
+	 * @return
+	 */
+	public String getUserIdentification() {
+		SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences( this );
+		final String userPreference = preferences.getString( SettingsActivity.KEY_USER, null );
+		return userPreference;
+	}
+
+	private void updateHeaderTextView( final String user ) {
+		final String text = this.getString( R.string.label_list_forms, user );
+		m_headerTextView.setText( text );
 	}
 
 	/*
@@ -124,8 +184,19 @@ public class FormsActivity extends FragmentActivity {
 		switch( item.getItemId() ) {
 		case R.id.menu_form_add:
 		{
+			final String creator = getUserIdentification();
+			if( creator == null ) {
+				final Builder dialog = new AlertDialog.Builder( this );
+				dialog.setTitle( R.string.dialog_alert_user_undefined_title );
+				dialog.setMessage( R.string.dialog_alert_form_create_user_message );
+				dialog.setPositiveButton( android.R.string.ok, null );
+				dialog.show();
+				break;
+			}
 			Intent intent = new Intent( context, EditFormActivity.class );
-			intent.putExtra( "form", (Parcelable) new Form() );
+			final Form newForm = new Form();
+			newForm.setCreator( creator );
+			intent.putExtra( "form", newForm );
 			startActivityForResult( intent, CREATE_FORM );
 			break;
 		}
@@ -178,33 +249,53 @@ public class FormsActivity extends FragmentActivity {
 		}
 		case R.id.menu_collection_upload:
 		{
-			final DatabaseHelper dbHelper = DatabaseHelper.getInstance( this.getApplicationContext() );
-			final NetworkHelper network = new NetworkHelper() {
-				@Override
-				protected void onPreExecute() {
-					item.setEnabled( false );
-					m_progressBar.setVisibility( ProgressBar.VISIBLE );
-				}
-				@Override
-				protected void onPostUpload( final Long result ) {
-					item.setEnabled( true );
-					m_progressBar.setVisibility( ProgressBar.INVISIBLE );
-					if( result == Form.NO_ID ) {
-						final String msg = getString( R.string.message_collections_upload_error );
-						final Toast toast = Toast.makeText( context, msg, Toast.LENGTH_LONG );
-						toast.show();
-					}
-					dbHelper.setCollectionsUpdated( result );
-					updateAdapter();
-				}
-			};
 			final FormAdapter adapter = (FormAdapter) getListAdapter();
 			final int count = adapter.getCount();
-			for( int position = 0; position < count; ++position ) {
-				final Long id = adapter.getItemId( position );
-				final List<Collection> collections = dbHelper.getCollectionsByForm( id, true );
-				network.uploadCollections( collections, id );
+			if( count > 0 ) {
+				final String collector = getUserIdentification();
+				if( collector == null ) {
+					final Builder dialog = new AlertDialog.Builder( this );
+					dialog.setTitle( R.string.dialog_alert_user_undefined_title );
+					dialog.setMessage( R.string.dialog_alert_form_upload_user_message );
+					dialog.setPositiveButton( android.R.string.ok, null );
+					dialog.show();
+					break;
+				}
+				final DatabaseHelper dbHelper = DatabaseHelper.getInstance( this.getApplicationContext() );
+				final NetworkHelper network = new NetworkHelper() {
+					@Override
+					protected void onPreExecute() {
+						item.setEnabled( false );
+						m_progressBar.setVisibility( ProgressBar.VISIBLE );
+					}
+					@Override
+					protected void onPostUpload( final Long result ) {
+						item.setEnabled( true );
+						m_progressBar.setVisibility( ProgressBar.INVISIBLE );
+						if( result == Form.NO_ID ) {
+							final String msg = getString( R.string.message_collections_upload_error );
+							final Toast toast = Toast.makeText( context, msg, Toast.LENGTH_LONG );
+							toast.show();
+						}
+						dbHelper.setCollectionsUpdated( result );
+						updateAdapter();
+					}
+				};
+
+				for( int position = 0; position < count; ++position ) {
+					final Long id = adapter.getItemId( position );
+					final List<Collection> collections = dbHelper.getCollectionsByForm( id, true );
+					for( Collection collection : collections ) {
+						collection.setCollector( collector );
+					}
+					network.uploadCollections( collections, id );
+				}
 			}
+			break;
+		}
+		case R.id.menu_settings:
+		{
+			editSettings( context );
 			break;
 		}
 		default:
@@ -305,7 +396,9 @@ public class FormsActivity extends FragmentActivity {
 		return adapter;
 	}
 
-	private ListView m_listView;
-	private ProgressBar m_progressBar;
+	public void editSettings( final Context context ) {
+		Intent intent = new Intent( context, SettingsActivity.class );
+		startActivity( intent );
+	}
 
 }
