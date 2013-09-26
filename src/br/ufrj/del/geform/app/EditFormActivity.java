@@ -128,8 +128,8 @@ public class EditFormActivity extends ListActivity {
 			m_form.setDescription( descriptionToUse );
 
 			final Builder dialog = new AlertDialog.Builder( this );
-			dialog.setTitle( R.string.dialog_alert_title );
-			dialog.setMessage( R.string.dialog_alert_message );
+			dialog.setTitle( R.string.dialog_alert_form_create_title );
+			dialog.setMessage( R.string.dialog_alert_form_create_message );
 			dialog.setPositiveButton( android.R.string.ok, new DialogInterface.OnClickListener() {
 				@Override
 				public void onClick( DialogInterface dialog, int which ) {
