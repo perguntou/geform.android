@@ -6,7 +6,7 @@
     android:versionName="1.0" >
 
     <uses-sdk
-        android:minSdkVersion="8"
+        android:minSdkVersion="9"
         android:targetSdkVersion="18" />
 
     <uses-permission android:name="android.permission.INTERNET" />
@@ -47,6 +47,11 @@
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="br.ufrj.del.geform.app.FillFormActivity" />
+        </activity>
+        <activity
+            android:name="br.ufrj.del.geform.app.SettingsActivity"
+            android:label="@string/title_activity_settings"
+            android:screenOrientation="portrait" >
         </activity>
     </application>
 
