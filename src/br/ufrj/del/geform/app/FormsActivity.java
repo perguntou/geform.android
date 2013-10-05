@@ -285,10 +285,12 @@ public class FormsActivity extends FragmentActivity {
 				for( int position = 0; position < count; ++position ) {
 					final Long id = adapter.getItemId( position );
 					final List<Collection> collections = dbHelper.getCollectionsByForm( id, true );
-					for( Collection collection : collections ) {
-						collection.setCollector( collector );
+					if( !collections.isEmpty() ) {
+						for( Collection collection : collections ) {
+							collection.setCollector( collector );
+						}
+						network.uploadCollections( collections, id );
 					}
-					network.uploadCollections( collections, id );
 				}
 			}
 			break;
