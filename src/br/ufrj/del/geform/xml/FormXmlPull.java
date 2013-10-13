@@ -17,7 +17,6 @@ import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
 import org.xmlpull.v1.XmlSerializer;
 
-import android.util.Log;
 import br.ufrj.del.geform.bean.Form;
 import br.ufrj.del.geform.bean.Item;
 import br.ufrj.del.geform.bean.Option;
@@ -107,7 +106,7 @@ public final class FormXmlPull extends AbstractXmlPull {
 	 * @see XmlPullParser
 	 * @see Form
 	 */
-	private static Form readForm( XmlPullParser parser ) throws XmlPullParserException, IOException, ParseException {
+	private Form readForm( XmlPullParser parser ) throws XmlPullParserException, IOException, ParseException {
 		Form form = new Form();
 
 		parser.require( XmlPullParser.START_TAG, namespace, Tag.FORM.toString() );
@@ -142,11 +141,7 @@ public final class FormXmlPull extends AbstractXmlPull {
 				form.add( item );
 				break;
 			default:
-				final String logTag = String.format( "%s.%s", FormXmlPull.class.getName(), FormXmlPull.class.getEnclosingMethod().getName() );
-				if( Log.isLoggable( logTag, Log.WARN ) ) {
-					final String message = String.format( "Case %s not handled in this switch.", tag );
-					Log.w( logTag, message );
-				}
+				unhandledTag( tag, parser, "readForm" );
 			}
 		}
 		return form;
@@ -199,7 +194,7 @@ public final class FormXmlPull extends AbstractXmlPull {
 	 * @see XmlPullParser
 	 * @see Item
 	 */
-	private static Item readItem( XmlPullParser parser ) throws XmlPullParserException, IOException {
+	private Item readItem( XmlPullParser parser ) throws XmlPullParserException, IOException {
 		Item item = new Item();
 
 		parser.require( XmlPullParser.START_TAG, namespace, Tag.ITEM.toString() );
@@ -227,11 +222,7 @@ public final class FormXmlPull extends AbstractXmlPull {
 				item.setOptions( options );
 				break;
 			default:
-				final String logTag = String.format( "%s.%s", FormXmlPull.class.getName(), FormXmlPull.class.getEnclosingMethod().getName() );
-				if( Log.isLoggable( logTag, Log.WARN ) ) {
-					final String message = String.format( "Case %s not handled in this switch.", tag );
-					Log.w( logTag, message );
-				}
+				unhandledTag( tag, parser, "readItem" );
 			}
 		}
 
@@ -270,7 +261,7 @@ public final class FormXmlPull extends AbstractXmlPull {
 	 * @throws IOException
 	 * @see XmlPullParser
 	 */
-	private static List<Option> readOptions( XmlPullParser parser ) throws XmlPullParserException, IOException {
+	private List<Option> readOptions( XmlPullParser parser ) throws XmlPullParserException, IOException {
 		List<Option> options = new ArrayList<Option>();
 
 		parser.require( XmlPullParser.START_TAG, namespace, Tag.OPTIONS.toString() );
@@ -286,11 +277,7 @@ public final class FormXmlPull extends AbstractXmlPull {
 				options.add( option );
 				break;
 			default:
-				final String logTag = String.format( "%s.%s", FormXmlPull.class.getName(), FormXmlPull.class.getEnclosingMethod().getName() );
-				if( Log.isLoggable( logTag, Log.WARN ) ) {
-					final String message = String.format( "Case %s not handled in this switch.", tag );
-					Log.w( logTag, message );
-				}
+				unhandledTag( tag, parser, "readOptions" );
 			}
 		}
 		parser.require(XmlPullParser.END_TAG, namespace, Tag.OPTIONS.toString() );
@@ -324,7 +311,7 @@ public final class FormXmlPull extends AbstractXmlPull {
 	 * @throws IOException
 	 * @throws XmlPullParserException
 	 */
-	private static Option readOption( XmlPullParser parser ) throws XmlPullParserException, IOException
+	private Option readOption( XmlPullParser parser ) throws XmlPullParserException, IOException
 	{
 		parser.require( XmlPullParser.START_TAG, namespace, Tag.OPTION.toString() );
 
@@ -351,11 +338,7 @@ public final class FormXmlPull extends AbstractXmlPull {
 				break;
 			}
 			default:
-				final String logTag = String.format( "%s.%s", FormXmlPull.class.getName(), FormXmlPull.class.getEnclosingMethod().getName() );
-				if( Log.isLoggable( logTag, Log.WARN ) ) {
-					final String message = String.format( "Case %s not handled in this switch.", tag );
-					Log.w( logTag, message );
-				}
+				unhandledTag( tag, parser, "readOption" );
 			}
 		}
 		parser.require( XmlPullParser.END_TAG, namespace, Tag.OPTION.toString() );
@@ -383,23 +366,6 @@ public final class FormXmlPull extends AbstractXmlPull {
 		serializeSimpleTextElement( value, Tag.VALUE, serializer );
 
 		serializer.endTag( namespace, Tag.OPTION.toString() );
-	}
-
-	/**
-	 * Internal method that extracts text values.
-	 * @param parser the responsible for parsing.
-	 * @return the text extracted.
-	 * @throws XmlPullParserException
-	 * @throws IOException
-	 * @see XmlPullParser
-	 */
-	private static String readText( XmlPullParser parser ) throws XmlPullParserException, IOException {
-		String text = new String();
-		if( parser.next() == XmlPullParser.TEXT ) {
-			text = parser.getText();
-			parser.nextTag();
-		}
-		return text;
 	}
 
 }
