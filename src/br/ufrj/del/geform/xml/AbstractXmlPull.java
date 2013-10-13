@@ -13,6 +13,7 @@ import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
 import org.xmlpull.v1.XmlSerializer;
 
+import android.util.Log;
 import br.ufrj.del.geform.xml.XmlElements.Tag;
 
 /**
@@ -56,6 +57,39 @@ public abstract class AbstractXmlPull {
 		serializer.startTag( namespace, tag.toString() );
 			serializer.text( value );
 		serializer.endTag( namespace, tag.toString() );
+	}
+
+	/**
+	 * Internal method that extracts text values.
+	 * @param parser the responsible for parsing.
+	 * @return the text extracted.
+	 * @throws XmlPullParserException
+	 * @throws IOException
+	 * @see XmlPullParser
+	 */
+	protected String readText( final XmlPullParser parser ) throws XmlPullParserException, IOException {
+		String text = new String();
+		if( parser.next() == XmlPullParser.TEXT ) {
+			text = parser.getText();
+			parser.nextTag();
+		}
+		return text;
+	}
+
+	/**
+	 * @param tag
+	 * @param parser
+	 * @param method
+	 * @throws IOException 
+	 * @throws XmlPullParserException 
+	 */
+	protected void unhandledTag( final Tag tag, final XmlPullParser parser, final String method ) throws XmlPullParserException, IOException {
+		final String logTag = getClass().getSimpleName();
+		if( Log.isLoggable( logTag, Log.WARN ) ) {
+			final String message = String.format( "%s: tag '%s' not handled.", method, tag );
+			Log.w( logTag, message );
+		}
+		readText( parser );
 	}
 
 //	/**
