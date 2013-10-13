@@ -30,4 +30,11 @@
 		<nature>com.android.ide.eclipse.adt.AndroidNature</nature>
 		<nature>org.eclipse.jdt.core.javanature</nature>
 	</natures>
+	<linkedResources>
+		<link>
+			<name>android-support-v7-appcompat</name>
+			<type>2</type>
+			<locationURI>PROJECT_LOC/support/android-support-v7-appcompat</locationURI>
+		</link>
+	</linkedResources>
 </projectDescription>

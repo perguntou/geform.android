@@ -21,6 +21,7 @@ import android.database.Cursor;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.FragmentActivity;
+import android.support.v7.app.ActionBarActivity;
 import android.text.InputType;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -43,8 +44,10 @@ import br.ufrj.del.geform.database.DatabaseHelper;
 import br.ufrj.del.geform.net.NetworkHelper;
 import br.ufrj.del.geform.xml.FormXmlPull;
 
-
-public class FormsActivity extends FragmentActivity {
+/**
+ * 
+ */
+public class FormsActivity extends ActionBarActivity {
 
 	private static final int COLLECT_DATA = 0;
 	private static final int CREATE_FORM = 1;
