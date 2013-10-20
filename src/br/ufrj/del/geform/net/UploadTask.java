@@ -91,7 +91,7 @@ public class UploadTask<T> extends AsyncTask<Object, Void, Pair<Integer,String>>
 			conn.setDoOutput( true );
 			conn.setUseCaches(false);
 			conn.setRequestMethod( "POST" );
-			conn.setRequestProperty( "content-type", "application/xml" );
+			conn.setRequestProperty( "content-type", "application/xml; charset=utf-8" );
 			final OutputStream outputStream = conn.getOutputStream();
 			stream = new BufferedOutputStream( outputStream );
 			handler.serialize( object, stream );
