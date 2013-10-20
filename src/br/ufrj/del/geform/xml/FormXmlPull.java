@@ -107,7 +107,7 @@ public final class FormXmlPull extends AbstractXmlPull {
 	 * @see Form
 	 */
 	private Form readForm( XmlPullParser parser ) throws XmlPullParserException, IOException, ParseException {
-		Form form = new Form();
+		final Form form = new Form();
 
 		parser.require( XmlPullParser.START_TAG, namespace, Tag.FORM.toString() );
 		while( parser.next() != XmlPullParser.END_TAG ) {
@@ -118,6 +118,11 @@ public final class FormXmlPull extends AbstractXmlPull {
 			final String name = parser.getName();
 			final Tag tag = Tag.fromString( name );
 			switch( tag ) {
+			case ID:
+				final String textId = readText( parser );
+				final long id = Long.valueOf( textId );
+				form.setId( id );
+				break;
 			case TITLE:
 				final String textTitle = readText( parser );
 				form.setTitle( textTitle );

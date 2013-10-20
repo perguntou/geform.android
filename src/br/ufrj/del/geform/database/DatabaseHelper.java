@@ -20,7 +20,7 @@ import br.ufrj.del.geform.bean.Form;
 public class DatabaseHelper extends SQLiteOpenHelper {
 
 	public static final String DATABASE_NAME = "geform.db";
-	public static final int DATABASE_VERSION = 3;
+	public static final int DATABASE_VERSION = 4;
 
 	public static final String FOREIGN_KEY_ENABLE = "PRAGMA foreign_keys = ON;";
 
@@ -105,24 +105,21 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 	/**
 	 * Inserts a form into the application's database.
 	 * @param title the form title.
-	 * @return the ID of the newly inserted form, or -1 if an error occurred.
 	 * @throws SQLException
 	 */
-	public long insertForm ( String title ) throws SQLException {
+	public void insertForm ( Long id, String title ) throws SQLException {
 		ContentValues content = new ContentValues();
-		content.putNull( FormsTable._ID );
+		content.put( FormsTable._ID, id );
 		content.put( FormsTable.COLUMN_TITLE, title );
 
 		SQLiteDatabase db = m_instance.getWritableDatabase();
 		db.beginTransaction();
-		long id = Form.NO_ID;
 		try {
-			id = db.insertOrThrow( FormsTable.TABLE_FORMS, null, content );
+			db.insertOrThrow( FormsTable.TABLE_FORMS, null, content );
 			db.setTransactionSuccessful();
 		} finally {
 			db.endTransaction();
 		}
-		return id;
 	}
 
 	/**

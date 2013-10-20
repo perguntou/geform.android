@@ -11,7 +11,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Parcelable;
 import android.text.Editable;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -22,6 +21,7 @@ import android.widget.Toast;
 import br.ufrj.del.geform.R;
 import br.ufrj.del.geform.bean.Form;
 import br.ufrj.del.geform.bean.Item;
+import br.ufrj.del.geform.net.NetworkHelper;
 
 /**
  *
@@ -100,7 +100,7 @@ public class EditFormActivity extends ListActivity {
 			startActivityForResult( intent, ADD_ITEM_REQUEST_CODE );
 			break;
 		}
-		case R.id.menu_item_accept:
+		case R.id.menu_form_done:
 		{
 			final EditText titleView = (EditText) findViewById( R.id.form_name );
 
@@ -133,10 +133,23 @@ public class EditFormActivity extends ListActivity {
 			dialog.setPositiveButton( android.R.string.ok, new DialogInterface.OnClickListener() {
 				@Override
 				public void onClick( DialogInterface dialog, int which ) {
-					final Intent intent = getIntent();
-					intent.putExtra( "form", (Parcelable) m_form );
-					setResult( Activity.RESULT_OK,  intent );
-					finish();
+					final NetworkHelper network = new NetworkHelper() {
+						@Override
+						protected void onPostUpload( Long result ) {
+							if( result == null ) {
+								final String msg = getString( R.string.message_form_creation_error );
+								final Toast toast = Toast.makeText( getBaseContext(), msg, Toast.LENGTH_LONG );
+								toast.show();
+								setResult( Activity.RESULT_CANCELED );
+							} else {
+								final Intent intent = getIntent();
+								intent.putExtra( "created_form_id", result );
+								setResult( Activity.RESULT_OK,  intent );
+							}
+							finish();
+						}
+					};
+					network.uploadForm( m_form );
 				}
 			} );
 			dialog.setNegativeButton( android.R.string.cancel, null );

@@ -10,6 +10,7 @@
 
 	<string name="message_download_error">Error downloading form from server.</string>
 	<string name="message_collections_upload_error">Error uploading collections to server.</string>
+	<string name="message_form_creation_error">Form could not be created.</string>
 	<string name="message_id_invalid">Identifier %s is not valid.</string>
 
 	<string name="message_answers_missing">There are items without an answer. Reply before proceed.</string>
