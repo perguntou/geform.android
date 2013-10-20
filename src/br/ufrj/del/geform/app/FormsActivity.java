@@ -40,6 +40,7 @@ import br.ufrj.del.geform.Constants;
 import br.ufrj.del.geform.R;
 import br.ufrj.del.geform.bean.Collection;
 import br.ufrj.del.geform.bean.Form;
+import br.ufrj.del.geform.bean.IdentifiableBean;
 import br.ufrj.del.geform.database.DatabaseHelper;
 import br.ufrj.del.geform.net.NetworkHelper;
 import br.ufrj.del.geform.xml.FormXmlPull;
@@ -185,7 +186,7 @@ public class FormsActivity extends ActionBarActivity {
 	public boolean onOptionsItemSelected( final MenuItem item ) {
 		final Context context = getBaseContext();
 		switch( item.getItemId() ) {
-		case R.id.menu_form_add:
+		case R.id.menu_form_create:
 		{
 			final String creator = getUserIdentification();
 			if( creator == null ) {
@@ -323,9 +324,27 @@ public class FormsActivity extends ActionBarActivity {
 				updateAdapter();
 				break;
 			case CREATE_FORM:
-				Form form = (Form) result.getParcelableExtra( "form" );
-				insertForm( form );
-				updateAdapter();
+				final Long id = result.getLongExtra( "created_form_id", IdentifiableBean.NO_ID );
+				final Context context = this.getBaseContext();
+				final NetworkHelper network = new NetworkHelper() {
+					@Override
+					protected void onPreExecute() {
+						m_progressBar.setVisibility( ProgressBar.VISIBLE );
+					}
+					@Override
+					protected void onPostDownload( Form result ) {
+						m_progressBar.setVisibility( ProgressBar.INVISIBLE );
+						if( result == null ) {
+							final String msg = getString( R.string.message_download_error );
+							final Toast toast = Toast.makeText( context, msg, Toast.LENGTH_LONG );
+							toast.show();
+							return;
+						}
+						insertForm( result );
+						updateAdapter();
+					}
+				};
+				network.downloadForm( id );
 				break;
 			default:
 			}
@@ -339,7 +358,8 @@ public class FormsActivity extends ActionBarActivity {
 	private void insertForm( Form form ) {
 		final DatabaseHelper dbHelper = DatabaseHelper.getInstance( this.getApplicationContext() );
 		final String title = form.getTitle();
-		final Long id = dbHelper.insertForm( title );
+		final Long id = form.getId();
+		dbHelper.insertForm( id, title );
 		try {
 			final File directory = getDir( "forms", FragmentActivity.MODE_PRIVATE );
 			final String path = String.format( "%s%s%s.%s", directory, File.separator, id, Constants.extension );

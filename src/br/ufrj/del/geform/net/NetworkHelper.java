@@ -11,20 +11,39 @@ import java.util.List;
 import android.util.Pair;
 import br.ufrj.del.geform.bean.Collection;
 import br.ufrj.del.geform.bean.Form;
+import br.ufrj.del.geform.bean.IdentifiableBean;
 
 /**
  *
  */
 public class NetworkHelper {
 
-	public static final String SERVER_URL = "http://10.0.2.2:8080/GeFormWS/rest/form";
+	public static final String SERVER_URL = "http://10.0.2.2:8080/GeForm/rest/forms";
 
 	/**
 	 * 
 	 * @param formId
-	 * @return
 	 */
 	public void downloadForm( long formId ) {
+		if( formId == IdentifiableBean.NO_ID ) {
+			final String message = String.format( "Invalid id (%s)", formId );
+			throw new IllegalArgumentException( message );
+		}
+		final String path = String.format( "%s/%s", SERVER_URL, formId );
+		URL url;
+		try {
+			url = new URL( path );
+			downloadForm( url );
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * 
+	 * @param url
+	 */
+	public void downloadForm( final URL url ) {
 		final DownloadTask downloadTask = new DownloadTask() {
 			@Override
 			protected void onPreExecute() {
@@ -35,13 +54,7 @@ public class NetworkHelper {
 				NetworkHelper.this.onPostDownload( result );
 			}
 		};
-		final String path = String.format( "%s/%s", SERVER_URL, formId );
-		try {
-			final URL url = new URL( path );
-			downloadTask.execute( url );
-		} catch( MalformedURLException e ) {
-			e.printStackTrace();
-		}
+		downloadTask.execute( url );
 	}
 
 	/**
@@ -58,7 +71,11 @@ public class NetworkHelper {
 			@Override
 			protected void onPostExecute( Pair<Integer,String> result ) {
 				final String stringValue = (result!= null) ? result.second : null;
-				final Long value = Long.getLong( stringValue, Form.NO_ID );
+				Long value = null;
+				try {
+					value = Long.parseLong( stringValue );
+				} catch( NumberFormatException e ) {
+				}
 				NetworkHelper.this.onPostUpload( value );
 			}
 		};
@@ -84,7 +101,7 @@ public class NetworkHelper {
 			@Override
 			protected void onPostExecute( Pair<Integer,String> result ) {
 				final String stringValue = (result!= null) ? result.second : null;
-				final Long value = Long.getLong( stringValue, Form.NO_ID );
+				final Long value = Long.valueOf( stringValue );
 				NetworkHelper.this.onPostUpload( value );
 			}
 		};

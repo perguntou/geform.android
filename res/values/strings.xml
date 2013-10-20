@@ -34,7 +34,7 @@
     <string name="dialog_alert_form_upload_user_message">Identify yourself before upload collections storaged.</string>
 
     <string name="menu_fromURL">From URL</string>
-    <string name="menu_add">Add</string>
+    <string name="menu_create_form">Create Form</string>
     <string name="menu_add_item">Add Item</string>
     <string name="menu_add_option">Add Option</string>
     <string name="menu_commit">Commit</string>
