@@ -18,7 +18,7 @@ public class CollectionsTable implements BaseColumns {
 
 	public static final String CREATE = "create table if not exists " + TABLE_COLLECTION + " (" +
 			_ID + " integer primary key, " +
-			COLUMN_FORM_ID + " integer, " +
+			COLUMN_FORM_ID + " integer not null, " +
 			_COUNT + " integer not null, " +
 			COLUMN_ITEM + " integer not null, " +
 			COLUMN_ANSWER + " text not null, " +
