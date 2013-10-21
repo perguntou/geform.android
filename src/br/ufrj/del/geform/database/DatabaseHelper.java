@@ -284,13 +284,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 			final ContentValues content = new ContentValues();
 			content.put( CollectionsTable.COLUMN_UPDATED, SQLITE_BOOLEAN_TRUE );
 			final String whereClause = String.format( "%s = ? and %s = ?", CollectionsTable.COLUMN_FORM_ID, CollectionsTable.COLUMN_UPDATED );
-			db.update(
+			int rowsAffected = db.update(
 					CollectionsTable.TABLE_COLLECTION,
 					content,
 					whereClause,
 					new String[] {formId.toString(), SQLITE_BOOLEAN_FALSE} );
-			db.execSQL( DROP_VIEW );
-			db.execSQL( CREATE_VIEW );
+			final String msg = String.format("Updating collections from form id = %s... %s rows affected.", formId, rowsAffected );
+			Log.i( getClass().getSimpleName(), msg );
+			db.setTransactionSuccessful();
 		} finally {
 			db.endTransaction();
 		}
