@@ -280,6 +280,7 @@ public class FormsActivity extends ActionBarActivity {
 							final String msg = getString( R.string.message_collections_upload_error );
 							final Toast toast = Toast.makeText( context, msg, Toast.LENGTH_LONG );
 							toast.show();
+							return;
 						}
 						dbHelper.setCollectionsUpdated( result );
 						updateAdapter();

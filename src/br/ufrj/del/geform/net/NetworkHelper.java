@@ -101,7 +101,11 @@ public class NetworkHelper {
 			@Override
 			protected void onPostExecute( Pair<Integer,String> result ) {
 				final String stringValue = (result!= null) ? result.second : null;
-				final Long value = Long.valueOf( stringValue );
+				Long value = IdentifiableBean.NO_ID;
+				try {
+					Long.parseLong( stringValue );
+					value = formId;
+				} catch( NumberFormatException e ) {}
 				NetworkHelper.this.onPostUpload( value );
 			}
 		};
