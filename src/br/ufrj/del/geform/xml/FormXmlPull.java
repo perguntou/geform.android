@@ -215,7 +215,7 @@ public final class FormXmlPull extends AbstractXmlPull {
 			switch( tag ) {
 			case ID:
 				final String textId = readText( parser );
-				final long id = Long.getLong( textId, Item.NO_ID ); 
+				final long id = Long.parseLong( textId );
 				item.setId( id );
 				break;
 			case QUESTION:
@@ -331,7 +331,7 @@ public final class FormXmlPull extends AbstractXmlPull {
 			case ID:
 			{
 				final String textId = readText( parser );
-				final long id = Long.getLong( textId, Option.NO_ID );
+				final long id = Long.parseLong( textId );
 				option.setId( id );
 				break;
 			}
