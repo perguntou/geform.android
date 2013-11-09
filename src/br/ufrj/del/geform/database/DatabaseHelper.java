@@ -215,12 +215,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 	 * 
 	 * @return
 	 */
-	public Cursor fetchAllForms() {
+	public boolean checkIfFormExists( final Long id ) {
 		SQLiteDatabase db = m_instance.getReadableDatabase();
-		Cursor cursor = db.query( FormsTable.TABLE_FORMS, new String[] { FormsTable._ID, FormsTable.COLUMN_TITLE }, null, null, null, null, null, FormsTable.COLUMN_TITLE );
+		Cursor cursor = db.query( FormsTable.TABLE_FORMS, new String[] { FormsTable.COLUMN_TITLE }, FormsTable._ID + " = ?", new String[] { String.valueOf( id ) }, null, null, null );
 		cursor.moveToFirst();
-
-		return cursor;
+		final boolean exists = cursor.isLast();
+		return exists;
 	}
 
 	/**

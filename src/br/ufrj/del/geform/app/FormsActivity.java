@@ -5,7 +5,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.text.ParseException;
 import java.util.Arrays;
 import java.util.List;
 
@@ -75,33 +74,10 @@ public class FormsActivity extends ActionBarActivity {
 		listView.setOnItemClickListener( new OnItemClickListener() {
 			@Override
 			public void onItemClick( AdapterView<?> parent, View view, int position, long id ) {
-				Form form = null;
-				try {
-					final ListView listView = getListView();
-					long identifier = listView.getItemIdAtPosition( position );
-					final File directory = getDir( "forms", FragmentActivity.MODE_PRIVATE );
-					final String path = String.format( "%s%s%s.%s", directory, File.separator, identifier, Constants.extension );
-					final FileInputStream in = new FileInputStream( path );
-					final FormXmlPull xmlHandler = FormXmlPull.getInstance();
-					final List<Form> result = xmlHandler.parse( in );
-					form = result.get(0);
-					form.setId( identifier );
-				} catch( FileNotFoundException e ) {
-					e.printStackTrace();
-				} catch( XmlPullParserException e ) {
-					e.printStackTrace();
-				} catch( IOException e ) {
-					e.printStackTrace();
-				} catch (ParseException e) {
-					e.printStackTrace();
-				}
-
-				final Collection collection = new Collection( form );
-				final Context context = getBaseContext();
-				Intent intent = new Intent( context, FillFormActivity.class );
-				intent.putExtra( "collection", collection );
-
-				startActivityForResult( intent, COLLECT_DATA );
+				final ListView listView = getListView();
+				final long identifier = listView.getItemIdAtPosition( position );
+				final Form form = loadForm( identifier );
+				startCollect( form );
 			}
 		} );
 		listView.addHeaderView( header, null, false );
@@ -233,6 +209,11 @@ public class FormsActivity extends ActionBarActivity {
 					if( !"".equals( value ) ) {
 						try {
 							final long id = Long.parseLong( value );
+							final DatabaseHelper dbHelper = DatabaseHelper.getInstance( context );
+							if( dbHelper.checkIfFormExists( id ) ) {
+								handleExistingForm( id );
+								return;
+							}
 							network.downloadForm( id );
 						} catch( NumberFormatException e ) {
 							final String format = getString( R.string.message_id_invalid );
@@ -265,7 +246,7 @@ public class FormsActivity extends ActionBarActivity {
 					dialog.show();
 					break;
 				}
-				final DatabaseHelper dbHelper = DatabaseHelper.getInstance( this.getApplicationContext() );
+				final DatabaseHelper dbHelper = DatabaseHelper.getInstance( context );
 				final NetworkHelper network = new NetworkHelper() {
 					@Override
 					protected void onPreExecute() {
@@ -309,6 +290,25 @@ public class FormsActivity extends ActionBarActivity {
 			return false;
 		}
 		return true;
+	}
+
+	/**
+	 * 
+	 * @param formId
+	 */
+	protected void handleExistingForm( final Long formId ) {
+		final Builder dialog = new AlertDialog.Builder( this );
+		dialog.setTitle( R.string.dialog_alert_form_downloaded_already_title );
+		dialog.setMessage( R.string.dialog_alert_form_downloaded_already_message );
+		dialog.setPositiveButton( android.R.string.ok, new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick( DialogInterface dialog, int which ) {
+				final Form form = loadForm( formId );
+				startCollect( form );
+			}
+		} );
+		dialog.setNegativeButton( android.R.string.cancel, null );
+		dialog.show();
 	}
 
 	/*
@@ -425,6 +425,41 @@ public class FormsActivity extends ActionBarActivity {
 	public void editSettings( final Context context ) {
 		Intent intent = new Intent( context, SettingsActivity.class );
 		startActivity( intent );
+	}
+
+	/**
+	 * 
+	 * @param identifier
+	 * @return
+	 * @throws RuntimeException
+	 */
+	private Form loadForm( final long identifier ) throws RuntimeException {
+		final Form form;
+		try {
+			final File directory = getDir( "forms", FragmentActivity.MODE_PRIVATE );
+			final String path = String.format( "%s%s%s.%s", directory, File.separator, identifier, Constants.extension );
+			final FileInputStream in = new FileInputStream( path );
+			final FormXmlPull xmlHandler = FormXmlPull.getInstance();
+			final List<Form> result = xmlHandler.parse( in );
+			form = result.get(0);
+			form.setId( identifier );
+		} catch( Exception e ) {
+			final String message = String.format( "Error while loading form (id=%s)", identifier );
+			throw new RuntimeException( message, e );
+		}
+		return form;
+	}
+
+	/**
+	 * @param form
+	 */
+	private void startCollect( final Form form ) {
+		final Collection collection = new Collection( form );
+		final Context context = getBaseContext();
+		Intent intent = new Intent( context, FillFormActivity.class );
+		intent.putExtra( "collection", collection );
+
+		startActivityForResult( intent, COLLECT_DATA );
 	}
 
 }

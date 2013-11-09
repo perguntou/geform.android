@@ -32,6 +32,8 @@
     <string name="dialog_alert_user_undefined_message">Configure user identification to enable all features.</string>
     <string name="dialog_alert_form_create_user_message">Identify yourself before start creating a form.</string>
     <string name="dialog_alert_form_upload_user_message">Identify yourself before upload collections storaged.</string>
+    <string name="dialog_alert_form_downloaded_already_title">Already have this form</string>
+    <string name="dialog_alert_form_downloaded_already_message">The form requested was found in local storage. Would like to open it?</string>
 
     <string name="menu_fromURL">From URL</string>
     <string name="menu_create_form">Create Form</string>
