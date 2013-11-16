@@ -4,6 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import android.annotation.SuppressLint;
+import android.app.AlertDialog;
+import android.app.AlertDialog.Builder;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
@@ -13,6 +17,8 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
@@ -30,6 +36,31 @@ public class EditOptionsFragment extends ListFragment {
 
 	private List<Option> m_options;
 	private MenuItem m_menuItem;
+
+	@Override
+	public void onActivityCreated( Bundle savedInstanceState ) {
+		super.onActivityCreated( savedInstanceState );
+		final ListView listView = getListView();
+		final Context context = getActivity();
+		listView.setOnItemLongClickListener( new OnItemLongClickListener() {
+			@Override
+			public boolean onItemLongClick(AdapterView<?> parent, View view, final int position, long id) {
+				final Builder dialog = new AlertDialog.Builder( context );
+				dialog.setTitle( R.string.dialog_option_remove_title );
+				dialog.setMessage( R.string.dialog_option_remove_message );
+				dialog.setPositiveButton( android.R.string.ok, new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick( DialogInterface dialog, int which ) {
+						m_options.remove( position );
+						((BaseAdapter) getListAdapter()).notifyDataSetChanged();
+					}
+				} );
+				dialog.setNegativeButton( android.R.string.cancel, null );
+				dialog.show();
+				return true;
+			}
+		} );
+	}
 
 	/*
 	 * (non-Javadoc)
