@@ -7,6 +7,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.app.ListActivity;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Build;
@@ -15,6 +16,8 @@ import android.text.Editable;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
@@ -53,6 +56,27 @@ public class EditFormActivity extends ListActivity {
 
 		final String description = m_form.getDescription();
 		((EditText) findViewById( R.id.form_description )).setText( description );
+
+		final ListView listView = getListView();
+		final Context context = this;
+		listView.setOnItemLongClickListener( new OnItemLongClickListener() {
+			@Override
+			public boolean onItemLongClick( AdapterView<?> parent, View view, final int position, long id ) {
+				final Builder dialog = new AlertDialog.Builder( context );
+				dialog.setTitle( R.string.dialog_item_remove_title );
+				dialog.setMessage( R.string.dialog_item_remove_message );
+				dialog.setPositiveButton( android.R.string.ok, new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick( DialogInterface dialog, int which ) {
+						m_form.remove( position );
+						((ItemAdapter) getListAdapter()).notifyDataSetChanged();
+					}
+				} );
+				dialog.setNegativeButton( android.R.string.cancel, null );
+				dialog.show();
+				return true;
+			}
+		} );
 
 		final List<Item> items = m_form.getItems();
 		setListAdapter( new ItemAdapter( this, android.R.layout.simple_list_item_1, items ) );
