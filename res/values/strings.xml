@@ -28,6 +28,8 @@
 
     <string name="dialog_item_remove_title">Remove Item</string>
     <string name="dialog_item_remove_message">This item will be removed.</string>
+    <string name="dialog_option_remove_title">Remove Option</string>
+    <string name="dialog_option_remove_message">This option will be removed.</string>
 
     <string name="dialog_alert_form_create_title">Confirm form creation</string>
     <string name="dialog_alert_form_create_message">You can not modify it after creation.</string>
