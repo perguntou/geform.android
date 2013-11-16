@@ -26,6 +26,9 @@
     <string name="title_activity_fill">Fill</string>
     <string name="title_activity_forms">FormsActivity</string>
 
+    <string name="dialog_item_remove_title">Remove Item</string>
+    <string name="dialog_item_remove_message">This item will be removed.</string>
+
     <string name="dialog_alert_form_create_title">Confirm form creation</string>
     <string name="dialog_alert_form_create_message">You can not modify it after creation.</string>
     <string name="dialog_alert_user_undefined_title">User undefined</string>
