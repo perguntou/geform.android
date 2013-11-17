@@ -31,6 +31,9 @@
     <string name="dialog_option_remove_title">Remove Option</string>
     <string name="dialog_option_remove_message">This option will be removed.</string>
 
+    <string name="dialog_form_info_title">Form Info</string>
+    <string name="dialog_form_info_message">Title: %1$s\nId: %2$d\nCreator: %3$s\nCreation Date: %4$s\nNumber of Items: %5$d\nDescription: %6$s</string>
+
     <string name="dialog_alert_form_create_title">Confirm form creation</string>
     <string name="dialog_alert_form_create_message">You can not modify it after creation.</string>
     <string name="dialog_alert_user_undefined_title">User undefined</string>
