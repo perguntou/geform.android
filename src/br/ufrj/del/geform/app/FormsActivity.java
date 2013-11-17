@@ -6,6 +6,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 import org.xmlpull.v1.XmlPullParserException;
@@ -22,6 +23,7 @@ import android.preference.PreferenceManager;
 import android.support.v4.app.FragmentActivity;
 import android.support.v7.app.ActionBarActivity;
 import android.text.InputType;
+import android.text.format.DateUtils;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -29,6 +31,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.HeaderViewListAdapter;
 import android.widget.ListAdapter;
 import android.widget.ListView;
@@ -40,6 +43,7 @@ import br.ufrj.del.geform.R;
 import br.ufrj.del.geform.bean.Collection;
 import br.ufrj.del.geform.bean.Form;
 import br.ufrj.del.geform.bean.IdentifiableBean;
+import br.ufrj.del.geform.bean.Item;
 import br.ufrj.del.geform.database.DatabaseHelper;
 import br.ufrj.del.geform.net.NetworkHelper;
 import br.ufrj.del.geform.xml.FormXmlPull;
@@ -78,6 +82,34 @@ public class FormsActivity extends ActionBarActivity {
 				final long identifier = listView.getItemIdAtPosition( position );
 				final Form form = loadForm( identifier );
 				startCollect( form );
+			}
+		} );
+		final Context thisActivity = this;
+		listView.setOnItemLongClickListener( new OnItemLongClickListener() {
+			@Override
+			public boolean onItemLongClick( AdapterView<?> parent, View view, int position, long id ) {
+				final ListView listView = getListView();
+				final long identifier = listView.getItemIdAtPosition( position );
+				final Form form = loadForm( identifier );
+				final Builder dialog = new AlertDialog.Builder( thisActivity );
+				dialog.setTitle( R.string.dialog_form_info_title );
+
+				final Date timestamp = form.getTimestamp();
+				final String description = form.getDescription();
+				final String descriptionToShow = description != null ? description : Constants.EMPTY_STRING;
+				List<Item> items = form.getItems();
+
+				final String message = getString( R.string.dialog_form_info_message,
+				form.getTitle(),
+				form.getId(),
+				form.getCreator(),
+				DateUtils.formatDateTime( thisActivity, timestamp.getTime(), DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_ABBREV_MONTH | DateUtils.FORMAT_SHOW_YEAR | DateUtils.FORMAT_SHOW_TIME ),
+				items.size(),
+				descriptionToShow );
+
+				dialog.setMessage( message );
+				dialog.show();
+				return true;
 			}
 		} );
 		listView.addHeaderView( header, null, false );
