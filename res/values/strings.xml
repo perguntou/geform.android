@@ -59,4 +59,7 @@
     <string name="settings_user">Name</string>
     <string name="settings_description_user">User identification</string>
     <string name="default_user">User</string>
+
+    <string name="delete">Delete</string>
+
 </resources>

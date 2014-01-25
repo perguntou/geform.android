@@ -124,6 +124,18 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
 	/**
 	 * 
+	 * @param id
+	 * @return
+	 */
+	public int removeForm( final Long id )
+	{
+		final SQLiteDatabase db = m_instance.getWritableDatabase();
+		final int status = db.delete( FormsTable.TABLE_FORMS, FormsTable._ID + " = ?", new String[] { id.toString() } );
+		return status;
+	}
+
+	/**
+	 * 
 	 * @param collection
 	 * @throws SQLException
 	 */

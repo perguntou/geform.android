@@ -99,15 +99,23 @@ public class FormsActivity extends ActionBarActivity {
 				final String descriptionToShow = description != null ? description : Constants.EMPTY_STRING;
 				List<Item> items = form.getItems();
 
+				final long formId = form.getId();
 				final String message = getString( R.string.dialog_form_info_message,
 				form.getTitle(),
-				form.getId(),
+				formId,
 				form.getCreator(),
 				DateUtils.formatDateTime( thisActivity, timestamp.getTime(), DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_ABBREV_MONTH | DateUtils.FORMAT_SHOW_YEAR | DateUtils.FORMAT_SHOW_TIME ),
 				items.size(),
 				descriptionToShow );
 
 				dialog.setMessage( message );
+				dialog.setPositiveButton( android.R.string.ok, null );
+				dialog.setNegativeButton( R.string.delete, new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick( DialogInterface dialog, int which ) {
+						deleteForm( formId );
+					}
+				} );
 				dialog.show();
 				return true;
 			}
@@ -480,6 +488,26 @@ public class FormsActivity extends ActionBarActivity {
 			throw new RuntimeException( message, e );
 		}
 		return form;
+	}
+
+	/**
+	 * 
+	 * @param identifier
+	 * @return
+	 */
+	private boolean deleteForm( final long identifier )
+	{
+		final DatabaseHelper dbHelper = DatabaseHelper.getInstance( this );
+		final int status = dbHelper.removeForm( identifier );
+		if( status > 0 ) {
+			final File directory = getDir( "forms", FragmentActivity.MODE_PRIVATE );
+			final String filename = String.format( "%s.%s", identifier, Constants.extension );
+			final File file = new File( directory, filename );
+			final boolean deleted = file.delete();
+			updateAdapter();
+			return deleted;
+		}
+		return false;
 	}
 
 	/**
