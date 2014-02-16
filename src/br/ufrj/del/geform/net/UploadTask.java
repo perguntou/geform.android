@@ -86,12 +86,15 @@ public class UploadTask<T> extends AsyncTask<Object, Void, Pair<Integer,String>>
 		HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 		try {
 			conn.setConnectTimeout( 15000 /* milliseconds */ );
-			conn.setChunkedStreamingMode( 0 );
-			conn.setDoInput( true ); 
+//			conn.setChunkedStreamingMode( 0 );
+			conn.setDoInput( true );
 			conn.setDoOutput( true );
-			conn.setUseCaches(false);
-			conn.setRequestMethod( "POST" );
+			conn.setUseCaches( false );
+//			conn.setRequestProperty( "Connection", "close" );
+//			conn.setRequestMethod( "POST" );
 			conn.setRequestProperty( "content-type", "application/xml; charset=utf-8" );
+			conn.connect();
+
 			final OutputStream outputStream = conn.getOutputStream();
 			stream = new BufferedOutputStream( outputStream );
 			handler.serialize( object, stream );
